@@ -1045,9 +1045,18 @@ if($mode -eq 1 -or $mode -eq 132 -or $mode -eq 2 -or $mode -eq "2r2") {
         $loginAddress2 = $arrayLoginAddress[$foundInstruction]    
         $loginAddress = "$loginAddress2$loginAddress1"                                           
 
+        if($loginAddress -eq "0000000000000000"){
+            $start = 24
+            $foundInstruction = [array]::indexof($arrayLoginAddress,"'dd") + $start
+            $loginAddress1 = $arrayLoginAddress[$foundInstruction]       
+            $foundInstruction = [array]::indexof($arrayLoginAddress,"'dd") + $start + 1
+            $loginAddress2 = $arrayLoginAddress[$foundInstruction]      
+            $loginAddress = "$loginAddress2$loginAddress1"                                                    
+        }
+
         $loginDB = &$CdbProgramPath -z $file -c "du $loginAddress;Q"   
-        $arrayloginDBAddress = ($loginDB -split ' ')    
-        
+        $arrayloginDBAddress = ($loginDB -split ' ')            
+
         $foundInstruction = [array]::indexof($arrayloginDBAddress,"'du") + 4
         $loginPlainText1 = $arrayloginDBAddress[$foundInstruction]
 
