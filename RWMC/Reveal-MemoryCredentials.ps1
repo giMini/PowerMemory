@@ -655,7 +655,7 @@ else {
     }
     else {
         if($operatingSystem -eq "6.1.7601" -or $operatingSystem -eq "6.1.7600"){
-            if($osArchitecture -eq "64 bits") {
+            if($osArchitecture -eq "64 bits" -or $osArchitecture -eq "64-bit") {
                 $mode = 1
             }
             else {
