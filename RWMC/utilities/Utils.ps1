@@ -191,7 +191,7 @@ function Stop-Script () {
 }
 
 function Test-InternetConnection {
-    if(!(Test-Connection -computer 8.8.8.8 -count 1 -quiet)) {
+    if(![Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]'{DCB00C01-570F-4A9B-8D69-199FDBA5723B}')).IsConnectedToInternet){
         Write-Host "The script need an Internet Connection to run" -f Red    
         Stop-Script
     }
@@ -215,29 +215,29 @@ function Test-LocalAdminRights {
 
 function Set-ActiveDirectoryInformations ($adFlag) {
     if (((gwmi win32_computersystem).partofdomain -eq $true) -and ($adFlag -eq 1)) {
-    $partOfADomain = 1
-    Import-Module activedirectory 
-    if (Get-Module -ListAvailable -Name activedirectory) {
-        Import-Module activedirectory
-    } else {
-        Write-Host "Module activedirectory does not exist, importing..."
-        Import-Module ServerManager 
-        Add-WindowsFeature RSAT-AD-PowerShell        
-    }    
-    $enterpriseAdminsGroup = "Enterprise Admins"
-    $schemaAdminsGroup = "Schema Admins"
-    $domainAdminsGroup = "Domain Admins"
-    $administratorsGroup = " Administrators"
-    $backupOperatorsGroup = "Backup Operators"    
-    $enterpriseAdmins = ""
-    $schemaAdmins = ""
-    $domainAdmins = ""
-    $administrators = ""
-    $backupOperators = ""
-    try {$enterpriseAdmins = (Get-ADGroupMember $enterpriseAdminsGroup -Recursive).DistinguishedName}catch{}
-    try {$schemaAdmins = (Get-ADGroupMember $schemaAdminsGroup -Recursive).DistinguishedName}catch{}
-    try {$domainAdmins = (Get-ADGroupMember $domainAdminsGroup -Recursive).DistinguishedName}catch{}
-    try {$administrators = (Get-ADGroupMember $administratorsGroup -Recursive).DistinguishedName}catch{}
-    try {$backupOperators = (Get-ADGroupMember $backupOperatorsGroup -Recursive).DistinguishedName}catch{}      
-}
+        $partOfADomain = 1
+        Import-Module activedirectory 
+        if (Get-Module -ListAvailable -Name activedirectory) {
+            Import-Module activedirectory
+        } else {
+            Write-Host "Module activedirectory does not exist, importing..."
+            Import-Module ServerManager 
+            Add-WindowsFeature RSAT-AD-PowerShell        
+        }    
+        $enterpriseAdminsGroup = "Enterprise Admins"
+        $schemaAdminsGroup = "Schema Admins"
+        $domainAdminsGroup = "Domain Admins"
+        $administratorsGroup = " Administrators"
+        $backupOperatorsGroup = "Backup Operators"    
+        $enterpriseAdmins = ""
+        $schemaAdmins = ""
+        $domainAdmins = ""
+        $administrators = ""
+        $backupOperators = ""
+        try {$enterpriseAdmins = (Get-ADGroupMember $enterpriseAdminsGroup -Recursive).DistinguishedName}catch{}
+        try {$schemaAdmins = (Get-ADGroupMember $schemaAdminsGroup -Recursive).DistinguishedName}catch{}
+        try {$domainAdmins = (Get-ADGroupMember $domainAdminsGroup -Recursive).DistinguishedName}catch{}
+        try {$administrators = (Get-ADGroupMember $administratorsGroup -Recursive).DistinguishedName}catch{}
+        try {$backupOperators = (Get-ADGroupMember $backupOperatorsGroup -Recursive).DistinguishedName}catch{}      
+    }
 }

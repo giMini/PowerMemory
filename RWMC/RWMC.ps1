@@ -63,6 +63,7 @@ $global:streamWriter = New-Object System.IO.StreamWriter $logPathName
 . $obsoleteSystemsFunctions
 
 #----------------------------------------------------------[Execution]----------------------------------------------------------
+
 Start-Log -scriptName $scriptName -scriptVersion $scriptVersion -streamWriter $global:streamWriter
 cls
 Write-Host "================================================================================================"
