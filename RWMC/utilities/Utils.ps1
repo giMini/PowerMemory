@@ -191,7 +191,7 @@ function Stop-Script () {
 }
 
 function Test-InternetConnection {
-    if(!(Test-Connection -computer 8.8.8.8 -count 1 -quiet)) {
+    if(![Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]'{DCB00C01-570F-4A9B-8D69-199FDBA5723B}')).IsConnectedToInternet){
         Write-Host "The script need an Internet Connection to run" -f Red    
         Stop-Script
     }
