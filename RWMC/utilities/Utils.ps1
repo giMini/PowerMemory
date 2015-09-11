@@ -169,11 +169,18 @@ function Clean-String ($tab, $matches) {
         $found = "$foundT"   
     }   
     else {
-        $fi = [array]::indexof($tabA,$chain) + 10
-        $found1 = $tabA[$fi]    
-        $fi = [array]::indexof($tabA,$chain) + 11
-        $found2 = $tabA[$fi]    
-        $found = "$found2$found1"   
+        if($mode -eq 232) {             
+            $fi = [array]::indexof($tabA,$chain) + 7
+            $foundT = $tabA[$fi]      
+            $found = "$foundT"   
+        }   
+        else {
+            $fi = [array]::indexof($tabA,$chain) + 10
+            $found1 = $tabA[$fi]    
+            $fi = [array]::indexof($tabA,$chain) + 11
+            $found2 = $tabA[$fi]    
+            $found = "$found2$found1"   
+        }
     }
     return $found
 }
