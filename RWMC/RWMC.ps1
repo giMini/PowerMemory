@@ -78,8 +78,9 @@ White-Rabbit
 
 # Prérequis
 Test-InternetConnection
-<#
+
 if($relaunched -eq 0) {
+<#
     if(!(Test-IsInLocalAdministratorsGroup)) {
         $elevate = 1    
         Bypass-UAC $scriptPath $logDirectoryPath
@@ -95,7 +96,7 @@ if($adminFlag -eq $false){
     Stop-Script
 }    
     #}
-#}
+}
 Write-Host "================================================================================================"
 $remoteLocalFile = Read-Host 'Do you want use Active Directory cmdlets ?
 1) Yes
