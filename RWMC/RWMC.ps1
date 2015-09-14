@@ -44,7 +44,7 @@ $osArchitecture = ""
 $operatingSystem = ""
 $server = ""
 $elevate = 0
-$dev_key - $null
+$dev_key = $null
 
 #----------------------------------------------------------[Declarations]----------------------------------------------------------
 
