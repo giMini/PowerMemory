@@ -132,30 +132,6 @@ switch ($remoteLocalFile){
     default {Write-Output "The option could not be determined... generate local dump"}
 }
 
-$exFiltrate = Read-Host 'Do you want exfiltrate the data (pastebin) ?
-1) Yes
-2) No
-0) Exit
-
-Enter menu number and press <ENTER>'
-switch ($exFiltrate){
-    "1" {$exFiltrate = 1}
-    "2" {$exFiltrate = 0}
-    "Yes" {$exFiltrate = 1}
-    "No" {$exFiltrate = 0}
-    "Y" {$exFiltrate = 1}
-    "N" {$exFiltrate = 0}
-    "0" {Stop-Script}    
-    default {Write-Output "The option could not be determined... Exfiltration will be not used";$exFiltrate = "0"}
-}
-if($exFiltrate -eq 1) {
-    $devKey = Read-Host 'What is your dev_key API (pastebin) ?
-
-    Enter your dev_key and press API <ENTER>'
-
-    $dev_key = $devKey
-}
-
 Set-ActiveDirectoryInformations $adFlag
 
 if($dump -eq "dump") {
@@ -220,6 +196,30 @@ else {
             }
         }
     }
+}
+
+$exFiltrate = Read-Host 'Do you want exfiltrate the data (pastebin) ?
+1) Yes
+2) No
+0) Exit
+
+Enter menu number and press <ENTER>'
+switch ($exFiltrate){
+    "1" {$exFiltrate = 1}
+    "2" {$exFiltrate = 0}
+    "Yes" {$exFiltrate = 1}
+    "No" {$exFiltrate = 0}
+    "Y" {$exFiltrate = 1}
+    "N" {$exFiltrate = 0}
+    "0" {Stop-Script}    
+    default {Write-Output "The option could not be determined... Exfiltration will be not used";$exFiltrate = "0"}
+}
+if($exFiltrate -eq 1) {
+    $devKey = Read-Host 'What is your dev_key API (pastebin) ?
+
+    Enter your dev_key and press API <ENTER>'
+
+    $dev_key = $devKey
 }
 
 if($mode -eq "2r2" -or $mode -eq "232") {
