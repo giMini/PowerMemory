@@ -209,25 +209,26 @@ function Call-MemoryWalker ($memoryWalker, $file, $fullScriptPath) {
     return $tab
 }
 
-function Clean-String ($tab, $matches) {
-    $chain = White-Rabbit42
+function Clean-String ($tab, $matches, $snapshot) {    
+    if($snapshot -eq $true) {$toAdd = 8;$chain="Implicit"}
+    else {$toAdd = 0;$chain = White-Rabbit42}
     $tabA = ($tab -split ' ')     
     if($mode -eq 132) { 
         $start = 20
-        $fi = [array]::indexof($tabA,$chain) + 7
+        $fi = [array]::indexof($tabA,$chain) + 7 + $toAdd
         $foundT = $tabA[$fi]      
         $found = "$foundT"   
     }   
     else {
         if($mode -eq 232) {             
-            $fi = [array]::indexof($tabA,$chain) + 7
+            $fi = [array]::indexof($tabA,$chain) + 7 + $toAdd
             $foundT = $tabA[$fi]      
             $found = "$foundT"   
         }   
         else {
-            $fi = [array]::indexof($tabA,$chain) + 10
+            $fi = [array]::indexof($tabA,$chain) + 10 + $toAdd
             $found1 = $tabA[$fi]    
-            $fi = [array]::indexof($tabA,$chain) + 11
+            $fi = [array]::indexof($tabA,$chain) + 11 + $toAdd
             $found2 = $tabA[$fi]    
             $found = "$found2$found1"   
         }
