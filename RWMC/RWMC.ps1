@@ -1,4 +1,4 @@
-﻿#requires -version 3
+﻿#requires -version 2
 <#
 
 .SYNOPSIS         
