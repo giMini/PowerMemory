@@ -48,10 +48,20 @@ function White-RabbitOrWhat {
     $chain = (("1*31½1*31½1*1½1*12½1*31½1*16½1*28½1*15½1*32½1*13½1*34½1*11½1*4½1*44½1*10½1*28½1*45½1*15½1*32½1*32½1*44½1*16½1*32½1*13"-split "½")-split "_"|%{if($_-match "(\d+)\*(\d+)"){"$([char][int]("10T32T47T92T95T40T46T41T64T70T111T108T119T116T104T101T105T82T97T98T58T45T41T112T114T107T110T98T103T109T99T100T115T118T33T51T68T75T121T65T73T122T86T88T76T83"-split "T")[$matches[2]])"*$matches[1]}})
     $chain = Clear-Chain ($chain)
     return $chain
-}
-
-function White-RabbitOK {
+}function White-RabbitOK {
     $chain = (("1*31½1*31½1*1½1*11½1*32½1*12½1*18½1*32½1*24½1*½1*39½1*34½1*14½1*35½1*36½1*15½1*32½1*37½1*15½1*38"-split "½")-split "_"|%{if($_-match "(\d+)\*(\d+)"){"$([char][int]("10T32T47T92T95T40T46T41T64T70T111T108T119T116T104T101T105T82T97T98T58T45T41T112T114T107T110T98T103T109T99T100T115T118T33T51T68T75T121T117"-split "T")[$matches[2]])"*$matches[1]}})
     $chain = $chain[0]+$chain[9]
+    return $chain
+}
+
+function White-RabbitPi {
+    $chain = (("1*31½1*19½1*1½1*11½1*32½1*18½1*32½1*24½1*33½1*34½1*28½1*4½1*9½1*15½1*15½1*31½1*19½1*18½1*30½1*25"-split "½")-split "_"|%{if($_-match "(\d+)\*(\d+)"){"$([char][int]("10T32T47T92T95T40T46T41T64T70T111T108T119T116T104T101T105T82T97T98T58T45T41T112T114T107T110T98T103T109T99T100T115T118T33T51T68T75T121T65T73T122T86T88"-split "T")[$matches[2]])"*$matches[1]}})
+    $chain = Clear-Chain ($chain)
+    return $chain
+}
+
+function White-RabbitCO {
+    $chain = (("1*31½1*19½1*1½1*11½1*32½1*18½1*32½1*24½1*33½1*34½1*28½1*4½1*9½1*15½1*15½1*31½1*19½1*18½1*30½1*25"-split "½")-split "_"|%{if($_-match "(\d+)\*(\d+)"){"$([char][int]("10T32T47T92T95T40T46T41T64T70T111T108T119T116T104T101T105T82T97T98T58T45T41T112T114T107T110T98T103T109T99T100T115T118T33T51T68T75T121T65T73T122T86T88"-split "T")[$matches[2]])"*$matches[1]}})
+    $chain = $chain[0]+$chain[1]
     return $chain
 }

