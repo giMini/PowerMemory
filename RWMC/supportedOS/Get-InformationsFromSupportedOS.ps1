@@ -1,9 +1,9 @@
 ﻿function Get-SupportedSystemsInformations ($buffer, $fullScriptPath) {      
     $chain = White-Rabbit1    
     Write-InFile $buffer "$chain"
-    $tab = Call-MemoryWalker $memoryWalker $file $fullScriptPath       
+    $tab = Call-MemoryWalker $memoryWalker $file $fullScriptPath            
     $chain42 = White-Rabbit42
-    $tabFA = ($tab -split ' ')            
+    $tabFA = ($tab -split ' ')                   
     $fi = [array]::indexof($tabFA,$chain42) + 4 
     $part1 = $tabFA[$fi]    
     $fi = [array]::indexof($tabFA,$chain42) + 5 
@@ -20,7 +20,7 @@
     $tabSplitted = ($tab -split ' ')         
     if($mode -eq 1) { $start = 20}
     if($mode -eq 2) { $start = 30}
-    if($mode -eq "2r2") { $start = 40}    
+    if($mode -eq "2r2" -or $mode -eq "2016") { $start = 40}    
     if($mode -eq "232") { $start = 38}    
     $j = 0
     $keyAddress = ""
@@ -57,7 +57,7 @@
         $keyAddress += "$comma"+"0x$keyAddress1, 0x$keyAddress2"        
         $j++
     }        
-    $keyToGet = $keyAddress               
+    $keyToGet = $keyAddress                       
     $chain = White-Rabbit3
     Write-InFile $buffer $chain    
     $tab = Call-MemoryWalker $memoryWalker $file $fullScriptPath       
@@ -153,7 +153,7 @@
         $iva += "$comma"+"0x$iva1"
         $j++
     }   
-    $ivHex = $iva                    
+    $ivHex = $iva             
     $chain = White-RabbitOrWhat
     Write-InFile $buffer $chain         
     $tab = Call-MemoryWalker $memoryWalker $file $fullScriptPath   
@@ -171,7 +171,7 @@
         $firstAddress2 = $tabf[$fi]    
         $firstAddress = "$firstAddress2$firstAddress1" 
     }    
-    $firstAddressList = $firstAddress
+    $firstAddressList = $firstAddress        
     $nextEntry = ""
     $i = 0
     while ($firstAddressList -ne $nextEntry) {
@@ -214,7 +214,7 @@
         $tab = ($ddSecond -split ' ')           
         if($mode -eq 1) { $start = 48}
         if($mode -eq 132 -or $mode -eq 232) { $start = 17}
-        if($mode -eq 2 -or $mode -eq "2r2") { $start = 24}         
+        if($mode -eq 2 -or $mode -eq "2r2" -or $mode -eq "2016") { $start = 24}         
         $fi = [array]::indexof($tab,$chain42) + $start
         $la1 = $tab[$fi] 
         $fi = [array]::indexof($tab,$chain42) + $start + 1

