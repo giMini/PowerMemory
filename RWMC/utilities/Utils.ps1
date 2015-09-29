@@ -206,7 +206,7 @@ function Write-InFile ($buffer, $chain) {
 
 function Call-MemoryWalker ($memoryWalker, $file, $fullScriptPath) {
     if($mode -eq "2016") {
-        $tab = &$memoryWalker -z $file -c "`$`$<$fullScriptPath;Q" -y $symbolsPath2016
+        $tab = &$memoryWalker -z $file -c "`$`$<$fullScriptPath;Q" -y "$scriptPath\misc\symbols2016TP3"
     }
     else {
         $tab = &$memoryWalker -z $file -c "`$`$<$fullScriptPath;Q" 

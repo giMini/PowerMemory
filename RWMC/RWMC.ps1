@@ -5,7 +5,7 @@
     Reveal credentials from memory dump
 
 .NOTES
-    Version:        0.2
+    Version:        0.3
     Author:         Pierre-Alexandre Braeken
     Creation Date:  2015-05-01
 
@@ -49,7 +49,6 @@ $elevate = 0
 $dev_key = $null
 $snapshot = $false
 $toADD = 0
-$symbolsPath2016 = ""
 
 #----------------------------------------------------------[Declarations]----------------------------------------------------------
 
@@ -162,9 +161,7 @@ if($dump -eq "dump" -or $dump -eq "snapshot") {
         "232" {Write-Output "Try to reveal password for Windows 10 32 bits"}
         "8.1" {Write-Output "Try to reveal password for Windows 8.1"}
         3 {Write-Output "Try to reveal password for Windows XP or 2003"}
-        "2016" {Write-Output "Try to reveal password for Windows 2016"
-                $symbolsPath2016 = Read-Host 'Enter the Symbols path ?'
-                }
+        "2016" {Write-Output "Try to reveal password for Windows 2016"}
         default {
                 Write-Output "The mode could not be determined... terminating"
                 Stop-Script
