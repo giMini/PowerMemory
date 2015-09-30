@@ -258,7 +258,7 @@ if($clearEventLog -eq 1) {
      Stop-Activities $scriptPath
 }
 
-if($mode -eq "2r2" -or $mode -eq "232") {
+if($mode -eq "2r2" -or $mode -eq "232" -or $mode -eq "2016") {
     if($mode -eq "2r2") {
         if($snapshot -eq $true) {
             $memoryWalker = "$scriptPath\debugger\2r2vm\cdb.exe"
