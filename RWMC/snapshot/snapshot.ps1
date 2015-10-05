@@ -246,7 +246,7 @@
             $fi = [array]::indexof($tab,"Implicit") + $toAdd
             $loginPlainText1 = $tab[$fi]
             $loginPlainText = $loginPlainText1 -replace """",""                                     
-            if (($partOfADomain -eq 1) -and ($adFlag -eq 1)) {
+            if (($global:partOfADomain -eq 1) -and ($adFlag -eq 1)) {
                 $user = ""
                 if(![string]::IsNullOrEmpty($loginPlainText)) {
 	                $user = Get-ADUser -Filter {UserPrincipalName -like $loginPlainText -or sAMAccountName -like $loginPlainText}
@@ -257,19 +257,19 @@
 	                    $domainAdminFlag = "false"
 	                    $administratorsFlag = "false"
 	                    $backupOperatorsFlag = "false"
-	                    if($enterpriseAdmins -ne ""){
-	                        $enterpriseAdminsFlag = $enterpriseAdmins.Contains($user)
+	                    if($global:enterpriseAdmins -ne ""){
+	                        $enterpriseAdminsFlag = $global:enterpriseAdmins.Contains($user)
 	                        if($enterpriseAdminsFlag -eq "true") {$loginPlainText = $loginPlainText + " = Enterprise Admins"}
 	                    }
-	                    if($schemaAdmins -ne ""){
-	                        $schemaAdminsFlag = $schemaAdmins.Contains($user)
+	                    if($global:schemaAdmins -ne ""){
+	                        $schemaAdminsFlag = $global:schemaAdmins.Contains($user)
 	                        if($schemaAdminsFlag -eq "true") {$loginPlainText = $loginPlainText + " = Schema Admins"}
 	                    }
-	                    $domainAdminFlag = $domainAdmins.Contains($user)
+	                    $domainAdminFlag = $global:domainAdmins.Contains($user)
 	                    if($domainAdminFlag -eq "true") {$loginPlainText = $loginPlainText + " = Domain Admin"}
-	                    $administratorsFlag = $administrators.Contains($user)
+	                    $administratorsFlag = $global:administrators.Contains($user)
 	                    if($administratorsFlag -eq "true") {$loginPlainText = $loginPlainText + " = Administrators"}
-	                    $backupOperatorsFlag = $backupOperators.Contains($user)
+	                    $backupOperatorsFlag = $global:backupOperators.Contains($user)
 	                    if($backupOperatorsFlag -eq "true") {$loginPlainText = $loginPlainText + " = Backup Operators"}            
 	                }
                 }

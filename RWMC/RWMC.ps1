@@ -40,7 +40,7 @@ $obsoleteSystemsFunctions = "$scriptPath\legacyOS\Get-InformationsFromLegacyOS.p
 $supportedOSSystemsFunctions = "$scriptPath\supportedOS\Get-InformationsFromSupportedOS.ps1"
 $snapshotFunctions = "$scriptPath\snapshot\snapshot.ps1"
 
-$partOfADomain = 0
+$global:partOfADomain = 0
 $adFlag = 0
 $osArchitecture = ""
 $operatingSystem = ""

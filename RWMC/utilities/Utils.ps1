@@ -304,16 +304,16 @@ function Set-ActiveDirectoryInformations ($adFlag) {
         $domainAdminsGroup = "Domain Admins"
         $administratorsGroup = " Administrators"
         $backupOperatorsGroup = "Backup Operators"    
-        $enterpriseAdmins = ""
-        $schemaAdmins = ""
-        $domainAdmins = ""
-        $administrators = ""
-        $backupOperators = ""
-        try {$enterpriseAdmins = (Get-ADGroupMember $enterpriseAdminsGroup -Recursive).DistinguishedName}catch{}
-        try {$schemaAdmins = (Get-ADGroupMember $schemaAdminsGroup -Recursive).DistinguishedName}catch{}
-        try {$domainAdmins = (Get-ADGroupMember $domainAdminsGroup -Recursive).DistinguishedName}catch{}
-        try {$administrators = (Get-ADGroupMember $administratorsGroup -Recursive).DistinguishedName}catch{}
-        try {$backupOperators = (Get-ADGroupMember $backupOperatorsGroup -Recursive).DistinguishedName}catch{}      
+        $global:enterpriseAdmins = ""
+        $global:schemaAdmins = ""
+        $global:domainAdmins = ""
+        $global:administrators = ""
+        $global:backupOperators = ""
+        try {$global:enterpriseAdmins = (Get-ADGroupMember $enterpriseAdminsGroup -Recursive).DistinguishedName}catch{}
+        try {$global:schemaAdmins = (Get-ADGroupMember $schemaAdminsGroup -Recursive).DistinguishedName}catch{}
+        try {$global:domainAdmins = (Get-ADGroupMember $domainAdminsGroup -Recursive).DistinguishedName}catch{}
+        try {$global:administrators = (Get-ADGroupMember $administratorsGroup -Recursive).DistinguishedName}catch{}
+        try {$global:backupOperators = (Get-ADGroupMember $backupOperatorsGroup -Recursive).DistinguishedName}catch{}      
     }
 }
 function Bypass-UAC ($scriptPath, $logDirectoryPath) {               
