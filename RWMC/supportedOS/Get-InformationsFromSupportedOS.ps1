@@ -20,7 +20,7 @@
     $tabSplitted = ($tab -split ' ')         
     if($mode -eq 1) { $start = 20}
     if($mode -eq 2) { $start = 30}
-    if($mode -eq "2r2" -or $mode -eq "2016") { $start = 40}    
+    if($mode -eq "8.1" -or $mode -eq "2r2" -or $mode -eq "2016") { $start = 40}    
     if($mode -eq "232") { $start = 38}    
     $j = 0
     $keyAddress = ""
@@ -214,7 +214,7 @@
         $tab = ($ddSecond -split ' ')           
         if($mode -eq 1) { $start = 48}
         if($mode -eq 132 -or $mode -eq 232) { $start = 17}
-        if($mode -eq 2 -or $mode -eq "2r2" -or $mode -eq "2016") { $start = 24}         
+        if($mode -eq 2 -or $mode -eq "8.1" -or $mode -eq "2r2" -or $mode -eq "2016") { $start = 24}         
         $fi = [array]::indexof($tab,$chain42) + $start
         $la1 = $tab[$fi] 
         $fi = [array]::indexof($tab,$chain42) + $start + 1

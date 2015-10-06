@@ -199,8 +199,13 @@ else {
             }
             else{
                 if($operatingSystem -eq "6.3.9600" -or $operatingSystem -eq "10.0.10240"){        
-                    if($osArchitecture -like "64*") {                
-                        $mode = "2r2"
+                    if($osArchitecture -like "64*") {  
+                        if($operatingSystem -eq "6.3.9600"){
+                            $mode = "8.1"       
+                        }       
+                        else {
+                            $mode = "2r2"
+                        }
                     }
                     else {
                         $mode = "232"
@@ -258,7 +263,7 @@ if($clearEventLog -eq 1) {
      Stop-Activities $scriptPath
 }
 
-if($mode -eq "2r2" -or $mode -eq "232" -or $mode -eq "2016") {
+if($mode -eq "2r2" -or $mode -eq "232" -or $mode -eq "2016" -or $mode -eq "8.1") {
     if($mode -eq "2r2") {
         if($snapshot -eq $true) {
             $memoryWalker = "$scriptPath\debugger\2r2vm\cdb.exe"
@@ -328,8 +333,8 @@ else {
 }
 
 if($snapshot -eq $false) {
-    if($mode -eq 1 -or $mode -eq 132 -or $mode -eq 2 -or $mode -eq "2r2" -or $mode -eq "232" -or $mode -eq "2016") {       
-        Get-SupportedSystemsInformations $buffer $fullScriptPath         
+    if($mode -eq 1 -or $mode -eq 132 -or $mode -eq 2 -or $mode -eq "2r2" -or $mode -eq "8.1" -or $mode -eq "232" -or $mode -eq "2016") {
+        Get-SupportedSystemsInformations $buffer $fullScriptPath             
     }
     else {    
         Get-ObsoleteSystemsInformations $buffer $fullScriptPath 
