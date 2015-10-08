@@ -1,7 +1,7 @@
 ﻿function Get-VMSnapshotInformations ($buffer, $fullScriptPath) {       
     $toAdd = 12
     $chainProcess = ""    
-    $chain = "!process 0 0 lsass.exe"    
+    $chain = White-RabbitContext    
     Write-InFile $buffer $chain    
     $tab = Call-MemoryWalker $memoryWalker $file $fullScriptPath 
     $tabFA = ($tab -split ' ')         

