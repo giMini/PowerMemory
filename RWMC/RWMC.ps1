@@ -1,4 +1,4 @@
-﻿#requires -version 2
+#requires -version 2
 <#
 
 .SYNOPSIS         
@@ -254,7 +254,12 @@ if($mode -eq "2r2" -or $mode -eq "232" -or $mode -eq "2016" -or $mode -eq "8.1")
                 $memoryWalker = "$scriptPath\debugger\pre2r2vm\cdb.exe"
             }
             else {
-                $memoryWalker = "$scriptPath\debugger\pre2r2\cdb.exe"
+                if($operatingSystem -eq "10.0.10240") {
+                    $memoryWalker = "$scriptPath\debugger\2r2\cdb.exe"
+                }
+                else {
+                    $memoryWalker = "$scriptPath\debugger\pre2r2\cdb.exe"
+                }
             }
         }
     }
