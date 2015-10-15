@@ -1,4 +1,26 @@
 ﻿function Set-RegistryKey($computername, $parentKey, $nameRegistryKey, $valueRegistryKey) {
+<#
+.SYNOPSIS
+    Set a setting in the registry
+    Author: Pierre-Alexandre Braeken (@pabraeken)
+    License: BSD 3-Clause
+    Required Dependencies: None
+    Optional Dependencies: None 
+
+.DESCRIPTION
+    Set-RegistryKey allows for the configuration of a registry setting
+
+.PARAMETER computername
+
+.PARAMETER parentKey
+
+.PARAMETER nameRegistryKey
+
+.PARAMETER valueRegistryKey
+    
+.EXAMPLE
+    C:\PS> Set-RegistryKey "Server1" "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System" "LocalAccountTokenFilterPolicy" "1"
+#>
     try{    
         $remoteBaseKeyObject = [microsoft.win32.registrykey]::OpenRemoteBaseKey('LocalMachine',$computername)     
         $regKey = $remoteBaseKeyObject.OpenSubKey($parentKey,$true)
