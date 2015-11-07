@@ -184,7 +184,7 @@
             $secondAddress1 = $arrayPasswordAddress[$fi]                
             $secondAddress = "$secondAddress1"   
             
-            $chain = "$chain15 $secondAddress"                 
+            $chain = "$chain15 $secondAddress L$numberBytes"                 
             Write-InFile $buffer $chain         
             $tab = Call-MemoryWalker $memoryWalker $file $fullScriptPath                
                    
@@ -193,9 +193,9 @@
             $passAddress2 = ""
             $j = 1
             $modJ = $j
-            $begin = 4
+            $begin = 5
             $stringPasswordHex = ""
-            while($j -le $numberBytes -and $j -le 64) {        
+            while($j -le $numberBytes) {        
                 if($j -eq 1) {
                     $value = $begin
                     $comma = ""

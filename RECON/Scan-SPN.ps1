@@ -1,36 +1,63 @@
-﻿Set-StrictMode -Version 2.0
+﻿#requires -version 2
+<#
+.SYNOPSIS
+  Scan services in a windows domain with SPN
+
+.PARAMETER [optional] domain
+    The domain to query
+
+.OUTPUTS
+  Console outputs
+
+.NOTES
+  Version:        0.1
+  Author:         Pierre-Alexandre Braeken
+  Creation Date:  2015-11-02
+  Purpose/Change: Initial script development
+  
+.EXAMPLE
+  .\Scan-SPN.ps1
+#>
+
+#---------------------------------------------------------[Initialisations]--------------------------------------------------------
+
+Set-StrictMode -version 2
+
 
 $scriptPath = split-path -parent $MyInvocation.MyCommand.Definition
+$scriptParentPath = split-path -parent $scriptPath
 $scriptFile = $MyInvocation.MyCommand.Definition
 $launchDate = get-date -f "yyyyMMddHHmmss"
-$logDirectoryPath = $scriptPath + "\" + $launchDate
+$logDirectoryPath = $scriptParentPath + "\" + $launchDate
 
-$loggingFunctions = "$scriptPath\logging\Logging.ps1"
+$loggingFunctions = "$scriptParentPath\RWMC\logging\Logging.ps1"
+$utilsFunctions = "$scriptParentPath\RWMC\utilities\Utils.ps1"
+$domainFunctions = "$scriptParentPath\RWMC\utilities\Domain.ps1"
+$vipFunctions = "$scriptParentPath\RWMC\utilities\VIP.ps1"
 
-$scriptName = [System.IO.Path]::GetFileName($scriptFile)
-$scriptVersion = "0.2"
+#----------------------------------------------------------[Declarations]----------------------------------------------------------
+
+#Script version will be write in the log file
+$scriptName = "Scan-SPN"
+$scriptVersion = "0.1"
+
+#Log File Info
 
 if(!(Test-Path $logDirectoryPath)) {
-    #New-Item $logDirectoryPath -type directory | Out-Null
+    New-Item $logDirectoryPath -type directory | Out-Null
 }
 
-$logFileName = "Log_" + $launchDate + ".log"
+$logFileName = "$scriptName" + "_" + $launchDate + ".log"
 $logPathName = "$logDirectoryPath\$logFileName"
 
-#$global:streamWriter = New-Object System.IO.StreamWriter $logPathName
+$global:streamWriter = New-Object System.IO.StreamWriter $logPathName
 
-$type = "LDAP"
+#-----------------------------------------------------------[Functions]------------------------------------------------------------
 
-function Stop-Script () {   
-    Begin{
-        Write-Output "--- Script terminating ---"
-    }
-    Process{        
-        "Script terminating..." 
-        Write-Output "================================================================================================"        
-        Exit
-    }
-}
+. $loggingFunctions
+. $utilsFunctions
+. $domainFunctions
+. $vipFunctions
 
 function Set-LDAPQuery {
 <#
@@ -75,61 +102,23 @@ function Set-LDAPQuery {
     return $LDAPObject 
 }
 
-function Scan-ServicePrincipalName {
-<#
-.SYNOPSIS
-    LDAP queries to locate service principal name in a domain
-    Author: Pierre-Alexandre Braeken (@pabraeken)
-    License: BSD 3-Clause
-    Required Dependencies: None
-    Optional Dependencies: None
- 
-.DESCRIPTION
-    Scan-ServicePrincipalName allows to locate service principal name in a domain. The output of this function is a list of SPNs of the type selected.
 
-.PARAMETER Type
-    Int parameter that let you specify the SPN type you want to query in the domain.
+#-----------------------------------------------------------[Execution]------------------------------------------------------------
 
-.EXAMPLE
-    C:\PS> Scan-ServicePrincipalName -Type $type
-#>
-    [CmdletBinding()] Param(
-        [Parameter(Mandatory = $True)]
-        [String]
-        [ValidateNotNullOrEmpty()]
-        $Type
-    )      
-    
-    $domainDistinguishedName = ([ADSI]'').distinguishedName    # (Get-ADDomain).DistinguishedName    
-    $domainControllerToQuery = ([ADSI]"LDAP://RootDSE").dnshostname
-
-    $LDAPObject = New-Object System.DirectoryServices.DirectorySearcher([ADSI]("LDAP://$domainControllerToQuery/"+ $domainDistinguishedName ))
-    $filter = "(servicePrincipalName=$Type*)" 
-    $propertiesToLoad = "name","distinguishedName,objectCategory,servicePrincipalName"
-    $scope = "subtree" 
-    $pageSize = 1000 
-    $LDAPQuery = Set-LDAPQuery $LDAPObject $filter $propertiesToLoad $scope $pageSize
-    $results = $LDAPQuery.FindAll() 
-    
-    "There are " + $results.count + " SPNs"
-    
-    foreach($result in $results) {
-        $userEntry = $result.GetDirectoryEntry()
-        Write-Output "Object Name = " $userEntry.name
-        Write-Output "DN      =      "  $userEntry.distinguishedName
-        Write-Output "Object Cat. = "  $userEntry.objectCategory
-        Write-Output "servicePrincipalNames"
-        $i=1
-        foreach($SPN in $userEntry.servicePrincipalName) {
-            Write-Output "SPN($i)=$SPN"
-            $i++
-        }
-        Write-Output ""
-    }         
-}
-
+Start-Log -scriptName $scriptName -scriptVersion $scriptVersion -streamWriter $global:streamWriter
 cls
-Write-Output "================================================================================================"        
+Write-Output "================================================================================================"
+White-Rabbit
+Write-Output "================================================================================================"
+
+$type = "LDAP"
+
+$domainDistinguishedName = ([ADSI]'').distinguishedName
+$currentDomain = [System.DirectoryServices.ActiveDirectory.Domain]::getCurrentDomain().Name 
+$forestDomain = Get-ForestDomain $currentDomain
+$domains = $forestDomain.forest.Domains
+
+ 
 $remoteLocalFile = Read-Host 'Which SPN type do you want to locate?
 1) CIFS
 2) DNS
@@ -172,4 +161,8 @@ switch ($remoteLocalFile){
     default {Write-Output "The option could not be determined... trying to locate LDAP SPN records"}
 }
 
-Scan-ServicePrincipalName -Type $type
+foreach($domain in $domains) {  
+    Scan-ServicePrincipalName -Type $type -Domain $domain
+}
+
+Read-Host

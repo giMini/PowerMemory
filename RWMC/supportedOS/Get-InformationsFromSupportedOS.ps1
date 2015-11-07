@@ -1,4 +1,4 @@
-﻿function Get-SupportedSystemsInformations ($buffer, $fullScriptPath) {      
+function Get-SupportedSystemsInformations ($buffer, $fullScriptPath) {      
     $chain = White-Rabbit1    
     Write-InFile $buffer "$chain"
     $tab = Call-MemoryWalker $memoryWalker $file $fullScriptPath            
@@ -284,7 +284,7 @@
             $secondAddress2 = $tab[$fi]    
             $secondAddress = "$secondAddress2$secondAddress1"        
         }        
-        $secondAddressCommand = "$chain2 $secondAddress"  
+        $secondAddressCommand = "$chain2 $secondAddress L$numberBytes"  
         Write-InFile $buffer $secondAddressCommand         
         $tab = Call-MemoryWalker $memoryWalker $file $fullScriptPath                                 
         $tabSplitted = ($tab -split ' ')                  
@@ -292,9 +292,9 @@
         $pa2 = ""
         $j = 1
         $modJ = $j
-        $begin = 4
+        $begin = 5
         $stringP = ""
-        while($j -le $numberBytes -and $j -le 64) {        
+        while($j -le $numberBytes) {        
             if($j -eq 1) {
                 $value = $begin
                 $comma = ""

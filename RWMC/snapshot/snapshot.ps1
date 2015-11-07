@@ -294,7 +294,7 @@
                 $secondAddress2 = $tab[$fi]    
                 $secondAddress = "$secondAddress2$secondAddress1"        
             }        
-            $secondAddressCommand = "$chain2 $secondAddress"  
+            $secondAddressCommand = "$chain2 $secondAddress L$numberBytes"  
             Write-InFile $buffer "$chainProcess;$secondAddressCommand"         
             $tab = Call-MemoryWalker $memoryWalker $file $fullScriptPath                                 
             $tabSplitted = ($tab -split ' ')                  
@@ -304,7 +304,7 @@
             $modJ = $j
             $begin = 4 + ($toAdd - 4)
             $stringP = ""
-            while($j -le $numberBytes -and $j -le 64) {        
+            while($j -le $numberBytes) {        
                 if($j -eq 1) {
                     $value = $begin
                     $comma = ""

