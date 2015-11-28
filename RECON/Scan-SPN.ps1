@@ -21,6 +21,10 @@
 
 #---------------------------------------------------------[Initialisations]--------------------------------------------------------
 
+param(
+    [String]$SPNScript
+    )
+
 Set-StrictMode -version 2
 
 
@@ -59,52 +63,9 @@ $global:streamWriter = New-Object System.IO.StreamWriter $logPathName
 . $domainFunctions
 . $vipFunctions
 
-function Set-LDAPQuery {
-<#
-.SYNOPSIS
-    Set a LDAP query
-    Author: Pierre-Alexandre Braeken (@pabraeken)
-    License: BSD 3-Clause
-    Required Dependencies: None
-    Optional Dependencies: None 
-
-.DESCRIPTION
-    Set-LDAPQuery allows for the configuration of a LDAP query. The output of this function is an LDAP object. 
-
-.PARAMETER LDAPObject
-    DirectorySearcher parameter that let you specify an LDAP object bound on a domain controller and a domain distinguished name.
-
-.PARAMETER filter
-
-.PARAMETER propertiesToLoad
-
-.PARAMETER scope
-
-.PARAMETER pageSize
-
-.EXAMPLE
-    C:\PS> Set-LDAPQuery $LDAPObject "(servicePrincipalName=MSSQL*)" "name","distinguishedName,objectCategory,servicePrincipalName" "subtree" "1000"
-#>
-    [CmdletBinding()] Param(
-        [Parameter(Mandatory = $True)]
-        $LDAPObject, 
-        $filter, 
-        $propertiesToLoad, 
-        $scope, 
-        $pageSize                
-    )    
-    $LDAPObject.Filter = $filter
-    foreach($property in $propertiesToLoad){
-        $LDAPObject.PropertiesToLoad.Add($property) | Out-Null
-    }
-    $LDAPObject.SearchScope = $scope
-    $LDAPObject.PageSize = $pageSize
-    return $LDAPObject 
-}
-
 
 #-----------------------------------------------------------[Execution]------------------------------------------------------------
-
+ 
 Start-Log -scriptName $scriptName -scriptVersion $scriptVersion -streamWriter $global:streamWriter
 cls
 Write-Output "================================================================================================"
@@ -112,13 +73,14 @@ White-Rabbit
 Write-Output "================================================================================================"
 
 $type = "LDAP"
-
+$domainControllerToQuery = ([ADSI]"LDAP://RootDSE").dnshostname
 $domainDistinguishedName = ([ADSI]'').distinguishedName
 $currentDomain = [System.DirectoryServices.ActiveDirectory.Domain]::getCurrentDomain().Name 
 $forestDomain = Get-ForestDomain $currentDomain
 $domains = $forestDomain.forest.Domains
 
- 
+$remoteLocalFile = $SPNScript 
+<#
 $remoteLocalFile = Read-Host 'Which SPN type do you want to locate?
 1) CIFS
 2) DNS
@@ -139,7 +101,7 @@ $remoteLocalFile = Read-Host 'Which SPN type do you want to locate?
 0) Exit
 
 Enter menu number and press <ENTER>' 
-
+#>
 switch ($remoteLocalFile){
     "1" {$type = "CIFS"}
     "2" {$type = "DNS"}
@@ -165,4 +127,4 @@ foreach($domain in $domains) {
     Scan-ServicePrincipalName -Type $type -Domain $domain
 }
 
-Read-Host
+#Read-Host

