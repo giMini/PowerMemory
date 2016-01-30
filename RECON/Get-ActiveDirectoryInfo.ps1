@@ -552,47 +552,74 @@ if($assessGPPconnectedForest -eq 1) {
     Write-Log -streamWriter $global:streamWriter -infoToLog "========================================"
     Write-Log -streamWriter $global:streamWriter -infoToLog $forestDomain.forest.Name 
     Write-Log -streamWriter $global:streamWriter -infoToLog "`t---------------------------------`n"   
-    $forestDistinguishedName = Get-DistinguishedNameFromFQDN $forestDomain.forest.Name   
-    $forestDomain.forest.Name   
-    $grouPolicyPreferences = Get-GPPPassword $forestDomain.forest.Name   
-    foreach ($gpp in $grouPolicyPreferences) {         
-        $changed = "{0}" -f $gpp.Changed
-        $usernames = "{0}" -f $gpp.UserNames
-        $newname = "{0}" -f $gpp.NewName
-        $passwords = "{0}" -f $gpp.Passwords
-        $file = "{0}" -f $gpp.File
 
-        Write-Log -streamWriter $global:streamWriter -infoToLog "Changed: $changed"
-        Write-Log -streamWriter $global:streamWriter -infoToLog "UserNames $usernames"
-        Write-Log -streamWriter $global:streamWriter -infoToLog "NewName $newname"
-        Write-Log -streamWriter $global:streamWriter -infoToLog "Passwords $passwords"
-        Write-Log -streamWriter $global:streamWriter -infoToLog "File $file"
-    } 
-     
-    $defaultNamingContext = $([ADSI] "LDAP://RootDSE").Get("defaultNamingContext")
-    $systemContainer = [ADSI]"LDAP://CN=System,$forestDistinguishedName"
+    $domainNameConnectedForestAndDomains = @()
+    $currentDomain = [System.DirectoryServices.ActiveDirectory.Domain]::getCurrentDomain().Name   
+    $domainControllerToQuery = ([ADSI]"LDAP://RootDSE").dnshostname
+    $currentDomainDistinguishedName = Get-DistinguishedNameFromFQDN $currentDomain     
+    $systemContainer = [ADSI]"LDAP://CN=System,$currentDomainDistinguishedName"
     $systemCollection = $systemContainer.psbase.children    
-    foreach ($system in $systemCollection){
+    foreach ($system in $systemCollection){    
         if($system.objectClass -eq "trustedDomain"){                         
-            $domainNameConnectedForest = $system.cn   
-            $domainNameConnectedForest  
-            Write-Log -streamWriter $global:streamWriter -infoToLog $domainNameConnectedForest   
-            Write-Log -streamWriter $global:streamWriter -infoToLog "`t---------------------------------`n"
-            $grouPolicyPreferences = Get-GPPPassword $domainNameConnectedForest
-            foreach ($gpp in $grouPolicyPreferences) {         
-                $changed = "{0}" -f $gpp.Changed
-                $usernames = "{0}" -f $gpp.UserNames
-                $newname = "{0}" -f $gpp.NewName
-                $passwords = "{0}" -f $gpp.Passwords
-                $file = "{0}" -f $gpp.File
-
-                Write-Log -streamWriter $global:streamWriter -infoToLog "Changed: $changed"
-                Write-Log -streamWriter $global:streamWriter -infoToLog "UserNames $usernames"
-                Write-Log -streamWriter $global:streamWriter -infoToLog "NewName $newname"
-                Write-Log -streamWriter $global:streamWriter -infoToLog "Passwords $passwords"
-                Write-Log -streamWriter $global:streamWriter -infoToLog "File $file"
-            }   
+            $domainNameConnectedForestAndDomains += $system.cn     
         }
+    }
+    $forestDomain = Get-ForestDomain $currentDomain
+    $forestDistinguishedName = Get-DistinguishedNameFromFQDN $forestDomain.forest.Name       
+    $LDAPConnection = New-Object System.DirectoryServices.Protocols.LdapConnection(New-Object System.DirectoryServices.Protocols.LdapDirectoryIdentifier("$($forestDomain.forest.Name)", 389)) 
+    $ok = 0
+    try {
+        $LDAPConnection.Bind()
+        $ok = 0
+    }
+    catch {
+        $ok = 1
+        $_
+    }
+    if ($ok -eq 0) {
+        $systemContainer = [ADSI]"LDAP://CN=System,$forestDistinguishedName"
+        $systemCollection = $systemContainer.psbase.children    
+        foreach ($system in $systemCollection){    
+            Write-Progress $system
+            if($system.objectClass -eq "trustedDomain"){                         
+                $domainNameConnectedForestAndDomains += $system.cn      
+                $selectedDomainDistinguishedName = Get-DistinguishedNameFromFQDN $system.cn            
+                $LDAPConnectionSelectedDomain = New-Object System.DirectoryServices.Protocols.LdapConnection(New-Object System.DirectoryServices.Protocols.LdapDirectoryIdentifier("$($system.cn)", 389)) 
+                $okSelectedDomain = 0
+                try {
+                    Write-Progress "Connection attempt to $($system.cn)"
+                    $LDAPConnectionSelectedDomain.Bind()
+                    $okSelectedDomain = 0
+                }
+                catch {
+                    $okSelectedDomain = 1
+                    $_
+                }
+                if ($okSelectedDomain -eq 0) {
+                    $systemContainerSelectedDomain = [ADSI]"LDAP://CN=System,$selectedDomainDistinguishedName"
+                    $systemCollectionSelectedDomain = $systemContainerSelectedDomain.psbase.children    
+                    foreach ($systemSelectedDomain in $systemCollectionSelectedDomain){    
+                        Write-Progress $systemSelectedDomain
+                        if($systemSelectedDomain.objectClass -eq "trustedDomain"){                         
+                            $domainNameConnectedForestAndDomains += $systemSelectedDomain.cn                     
+                        }
+                    }    
+                } 
+                else {
+                    Write-Progress "Unable to LDAP to $($system.cn)"
+                }
+            }
+        }
+    }
+
+    $domainNameConnectedForestAndDomains = $domainNameConnectedForestAndDomains | select -uniq
+
+    foreach ($dncfad in $domainNameConnectedForestAndDomains) {
+        Write-Log -streamWriter $global:streamWriter -infoToLog "---------------------------------`n"
+        Write-Log -streamWriter $global:streamWriter -infoToLog $dncfad   
+        Write-Log -streamWriter $global:streamWriter -infoToLog "*********************************"
+        Write-Progress "Look domain $dncfad"
+        $grouPolicyPreferences = Get-GPPPassword -Domain $dncfad    
     }
 }
 # Test write rights in all the forests connected
