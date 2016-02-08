@@ -18,7 +18,7 @@ function Get-SupportedSystemsInformations ($buffer, $fullScriptPath) {
     Write-InFile $buffer $command 
     $tab = &$memoryWalker -z $file -c "`$`$<$fullScriptPath;Q"                      
     $tabSplitted = ($tab -split ' ')         
-    if($mode -eq 1) { $start = 20}
+    if($mode -eq 1 -or $mode -eq 132) { $start = 20}
     if($mode -eq 2) { $start = 30}
     if($mode -eq "8.1" -or $mode -eq "2r2" -or $mode -eq "2016") { $start = 40}    
     if($mode -eq "232") { $start = 38}    
