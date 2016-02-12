@@ -1,5 +1,7 @@
 ﻿<#
 
+PowerShell version of @funoverip McAfee decryption of SiteList.xml to retrieve Plaintext passwords
+
 Based on the work of @funoverip
 https://github.com/funoverip/mcafee-sitelist-pwd-decryption\
 
