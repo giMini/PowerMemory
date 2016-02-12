@@ -5,7 +5,7 @@
     PowerMemory launcher
 
 .NOTES
-    Version:        1.0
+    Version:        1.1
     Author:         Pierre-Alexandre Braeken    
 
 #>
