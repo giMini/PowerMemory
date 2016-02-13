@@ -155,7 +155,7 @@ $advapi32 = Add-Type -MemberDefinition $advapi32MethodDefinition -Name 'Advapi32
 $netResource = new-object Win32Api.NetResource
 $netResource.lpRemoteName = ("\\127.0.0.1@$port\folder\")
 
-$res = [Win32Api.NativeMethods]::WNetAddConnection2($netResource, 0, 0, $opts)
+$res = [Win32Api.NativeMethods]::WNetAddConnection2($netResource, $null, $null, 0)
 
 
 $duplicateEncryptionInfoResult = $advapi32::DuplicateEncryptionInfoFile("\\127.0.0.1@$port\folder\file", "x", 2, 128, [IntPtr]::Zero);
