@@ -40,6 +40,7 @@ $vipFunctions = "$scriptPath\utilities\VIP.ps1"
 $obsoleteSystemsFunctions = "$scriptPath\legacyOS\Get-InformationsFromLegacyOS.ps1"
 $supportedOSSystemsFunctions = "$scriptPath\supportedOS\Get-InformationsFromSupportedOS.ps1"
 $snapshotFunctions = "$scriptPath\snapshot\snapshot.ps1"
+$kernelFunctions = "$scriptPath\kernel\kernel.ps1"
 
 $global:partOfADomain = 0
 $adFlag = 0
@@ -51,6 +52,7 @@ $server = ""
 $elevate = 0
 $dev_key = $null
 $snapshot = $false
+$kernel = $false
 $toADD = 0
 $mode = ""
 $hostMode = ""
@@ -80,6 +82,7 @@ $global:streamWriter = New-Object System.IO.StreamWriter $logPathName
 . $supportedOSSystemsFunctions
 . $obsoleteSystemsFunctions
 . $snapshotFunctions
+. $kernelFunctions
 
 #----------------------------------------------------------[Execution]----------------------------------------------------------
 
@@ -132,6 +135,7 @@ $remoteLocalFile = Read-Host 'Local computer, Remote computer or from a dump fil
 2) Remote
 3) lsass process .dmp
 4) VM snapshot .dmp
+5) kernel mode (mode debug must be activated)
 0) Exit
 
 Enter menu number and press <ENTER>'
@@ -140,6 +144,7 @@ switch ($remoteLocalFile){
     "2" {$dump = "remote"}
     "3" {$dump = "dump"}
     "4" {$dump = "snapshot"}
+    "5" {$dump = "kernel"}
     "0" {Stop-Script}
     "m" {cls;White-MakeMeASandwich;Stop-Script}
     default {Write-Output "The option could not be determined... generate local dump"}
@@ -147,7 +152,7 @@ switch ($remoteLocalFile){
 
 Set-ActiveDirectoryInformations $adFlag
 
-if($dump -eq "dump" -or $dump -eq "snapshot") {
+if($dump -eq "dump" -or $dump -eq "snapshot" -or $dump -eq "kernel") {
     if($dump -eq "dump") {
         $dump = Read-Host 'Enter the path of your lsass process dump'
     }
@@ -155,6 +160,11 @@ if($dump -eq "dump" -or $dump -eq "snapshot") {
         if($dump -eq "snapshot") {
             $snapshot = $true
             $dump = Read-Host 'Enter the path of your VM snapshot dump'
+        }
+        else {
+            if($dump -eq "kernel") {
+                $kernel = $true
+            }
         }
     }
     $mode = Read-Host 'Mode (3 (Windows 2003), 1 (Win 7 and 2008r2), 132 (Win 7 32 bits), 2 (Win 8 and 2012), 2r2 (Win 10 and 2012r2), 232 (Win 10 32 bits) 8.1 (Win 8.1) or 2016 (Windows Server 2016))?'
@@ -317,17 +327,23 @@ else {
         $file = $dump
     }
 }
-
-if($snapshot -eq $false) {
-    if($mode -eq 1 -or $mode -eq 132 -or $mode -eq 2 -or $mode -eq "2r2" -or $mode -eq "8.1" -or $mode -eq "232" -or $mode -eq "2016") {
-        Get-SupportedSystemsInformations $buffer $fullScriptPath             
+if($kernel -eq $false) {
+    if($snapshot -eq $false) {
+        if($mode -eq 1 -or $mode -eq 132 -or $mode -eq 2 -or $mode -eq "2r2" -or $mode -eq "8.1" -or $mode -eq "232" -or $mode -eq "2016") {
+            Get-SupportedSystemsInformations $buffer $fullScriptPath             
+        }
+        else {    
+            Get-ObsoleteSystemsInformations $buffer $fullScriptPath 
+        }
     }
-    else {    
-        Get-ObsoleteSystemsInformations $buffer $fullScriptPath 
+    else {
+        Get-VMSnapshotInformations $buffer $fullScriptPath         
     }
 }
 else {
-    Get-VMSnapshotInformations $buffer $fullScriptPath         
+    $MemoryKernelWalker = "$scriptPath\debugger\x64\kd.exe"
+    $symbols = "srv*c:\symbols*http://msdl.microsoft.com/download/symbols"
+    Get-KernelInformations $buffer $fullScriptPath 
 }
 Write-Progress -Activity "Removing symbols" -status "Running..." -id 1 
 Remove-Item -Recurse -Force c:\symbols

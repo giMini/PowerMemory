@@ -238,7 +238,8 @@ function Call-MemoryWalker ($memoryWalker, $file, $fullScriptPath) {
 
 function Clean-String ($tab, $matches, $snapshot) {    
     if($snapshot -eq $true) {$toAdd = 8;$chain="Implicit"}
-    else {$toAdd = 0;$chain = White-Rabbit42}
+    else {if($snapshot -eq "kernel") {$toAdd = 7;$chain="Implicit"}
+        else {$toAdd = 0;$chain = White-Rabbit42}}
     $tabA = ($tab -split ' ')     
     if($mode -eq 132) { 
         $start = 20
@@ -631,4 +632,8 @@ function Get-GPPPassword {
     else {
        Write-Log -streamWriter $global:streamWriter -infoToLog "Unable to access the directory \\$domain\SYSVOL" 
     }
+}
+function Call-MemoryKernelWalker ($kd, $file, $fullScriptPath, $symbols) {    
+    $tab = &$kd -kl -y $symbols -c "`$`$<$fullScriptPath;Q"  
+    return $tab
 }
