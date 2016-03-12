@@ -481,6 +481,27 @@ foreach($domain in $domains) {
         #Write-Output "$datePwdLastSet"
     }    
     
+    $propertiesToLoad=""
+    Try{
+        $LDAPObject = New-Object System.DirectoryServices.DirectorySearcher([ADSI]("LDAP://$domainControllerToQuery/"+ $domainDistinguishedName ))    
+        $filter = "(&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=32))"         
+        $propertiesToLoad = "Name","pwdLastSet","userAccountControl, objectSID"
+        $scope = "subtree" 
+        $pageSize = 1000 
+        $LDAPQuery  = Set-LDAPQuery $LDAPObject $filter $propertiesToLoad $scope $pageSize    
+        $users = $LDAPQuery.FindAll() 
+        Write-Log -streamWriter $global:streamWriter -infoToLog "$(Get-Date): `n`n`t`tListing potential empty accounts password`n"  
+        foreach($user in $users) {
+            $byte = $user.Properties.objectSID
+            Write-Log -streamWriter $global:streamWriter -infoToLog "$($user.Properties.name) (" + (New-Object System.Security.Principal.SecurityIdentifier($byte[0],0)).Value + ")"
+            Write-Log -streamWriter $global:streamWriter -infoToLog "----------------------------------------------------------------------------------------------"
+        }
+    }
+    Catch{
+        Write-Host $_.Exception
+        Break
+    }
+
     # GPP assessment
     if($assessGPP -eq 1) {                
         <#
