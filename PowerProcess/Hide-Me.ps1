@@ -55,7 +55,7 @@ Switch ($mode) {
     "1" { 
             $offset = "208"
             $sidHashOffset = "+0x0e0+0x010"
-            $activeProcessLinksOffset = ""
+            $activeProcessLinksOffset = "0x188"
         }
     "132" { 
             $offset = "f8"
