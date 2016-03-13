@@ -5,7 +5,7 @@
     Reveal credentials from Windows Memory
 
 .NOTES
-    Version:        0.4
+    Version:        1.2
     Author:         Pierre-Alexandre Braeken
     Creation Date:  2015-05-01
 
@@ -60,7 +60,7 @@ $hostMode = ""
 #----------------------------------------------------------[Declarations]----------------------------------------------------------
 
 $scriptName = [System.IO.Path]::GetFileName($scriptFile)
-$scriptVersion = "0.4"
+$scriptVersion = "1.2"
 
 if(!(Test-Path $logDirectoryPath)) {
     New-Item $logDirectoryPath -type directory | Out-Null
