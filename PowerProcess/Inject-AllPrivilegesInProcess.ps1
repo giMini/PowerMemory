@@ -190,7 +190,6 @@ $chain = "!sid $structSIDANDATTRIBUTESAddress"
 Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabOffset -split ' ')    
-$tabFA
 $fi = [array]::indexof($tabFA,"lkd>") + 11
 $sidValue = $tabFA[$fi]
 Write-Output "SID is: $sidValue"
