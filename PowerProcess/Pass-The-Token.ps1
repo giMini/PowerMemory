@@ -13,7 +13,7 @@ This utility must be run with elevated permissions.
 We need the /debug mode switch to on (bcdedit.exe /debug on)
 
 .EXAMPLE 
-PS > Be-Anyone -Source elevatedService.exe -Destination cmd.exe
+PS > Pass-The-Token -Source elevatedService.exe -Destination cmd.exe
 
 Windows 7, 8, 10 supported (64 bits)
 
