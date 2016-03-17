@@ -318,7 +318,7 @@ $chain = "f $entryPointAddress L4 $($nullPadding.Substring(0,2)) $($nullPadding.
 Write-InFile $buffer "$chain"
 $tabSystem = Call-UserLandMemoryWalker $memoryWalker $file $fullScriptPath $symbols
 #>
-
+<#
 $Win32API = @"
 [DllImport("kernel32.dll")]
 public static extern IntPtr CreateRemoteThread(IntPtr hProcess, uint lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);
@@ -332,5 +332,10 @@ $processNameFirst = $ProcessName.Split(".")
 $process = Get-Process $processNameFirst[0]
 
 $winAPIFunc::CreateRemoteThread($process.Handle,0,0,$test,0,0,0)
+#>
+$chain = "r @rip=0x$moduleAddress"
+Write-InFile $buffer "$chain"
+$tabSystem = Call-UserLandMemoryWalker $memoryWalker $file $fullScriptPath $symbols
+
 
 Stop-Script
