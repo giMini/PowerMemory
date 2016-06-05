@@ -105,7 +105,6 @@ dt nt!_eprocess ActiveProcessLinks. ImageFileName $processAddress"
 Write-InFile $buffer "$chain"
 $tabSystem = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabSystem -split ' ')   
-$tabFA                
 $fi = [array]::indexof($tabFA,"[") + 1
 $FLINK = $tabFA[$fi]
 $fi = [array]::indexof($tabFA,"]") - 1
