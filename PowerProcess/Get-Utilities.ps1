@@ -34,8 +34,13 @@
                          $mode = "2016"
                     }
                     else {
-                        Write-Output "The operating system could not be determined... terminating..."
-                        Stop-Script 
+                        if($operatingSystem -eq "10.0.14342") {
+                             $mode = "1014342"
+                        }
+                        else {
+                            Write-Output "The operating system could not be determined... terminating..."
+                            Stop-Script
+                        }
                     }
                 }
             }

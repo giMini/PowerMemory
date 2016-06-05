@@ -79,6 +79,12 @@ Switch ($mode) {
             #   +0x2f0 ActiveProcessLinks : _LIST_ENTRY
             $activeProcessLinksOffset = "0x2f0"
         }
+    "1014342" {
+            $offset = "358"
+            $sidHashOffset = "+0x0e8+0x010"
+            #   +0x2f0 ActiveProcessLinks : _LIST_ENTRY
+            $activeProcessLinksOffset = "0x2f0"
+    }
 }
 
 Write-Output "Trying to get the process $ProcessName address"

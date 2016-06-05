@@ -69,6 +69,9 @@ Switch ($mode) {
     "2016" { 
             $memoryWalker = "$scriptPath\debugger\x64\cdb.exe"
         }
+    "1014342" {
+            $memoryWalker = "$scriptPath\debugger\x64\cdb.exe"
+        }
 }
 
 Clear-Host

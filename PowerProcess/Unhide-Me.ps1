@@ -51,7 +51,7 @@ $operatingSystem = (Get-WmiObject Win32_OperatingSystem).version
 $osArchitecture =  (Get-WmiObject Win32_OperatingSystem).OSArchitecture
 
 $mode = Get-OperatingSystemMode $operatingSystem $osArchitecture
-
+$symfix = ""
 Switch ($mode) {
     "1" { 
             $offset = "208"
@@ -80,11 +80,20 @@ Switch ($mode) {
             #   +0x2f0 ActiveProcessLinks : _LIST_ENTRY
             $activeProcessLinksOffset = "0x2f0"
         }
+    "1014342" {
+            $offset = "358"
+            $sidHashOffset = "+0x0e8+0x010"
+            #   +0x2f0 ActiveProcessLinks : _LIST_ENTRY
+            $activeProcessLinksOffset = "0x2f0"
+            $symfix = ".symfix
+.reload /f nt"
+    }
 }
 
 Write-Output "Trying to unhide the process at address: $ProcessAddress..."
 
-$chain = "dt nt!_EPROCESS ImageFileName $ProcessAddress"
+$chain = "$symfix
+dt nt!_EPROCESS ImageFileName $ProcessAddress"
 Write-InFile $buffer "$chain"
 $tabSystem = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabSystem -split ' ')                
@@ -93,21 +102,24 @@ $processName = $tabFA[$fi]
 Write-Output "A process has been found ($processName)"
 
 Write-Output "Get a previous process to insert $processName after..."
-$chain = "!process 0 0 System"
+$chain = "$symfix
+!process 0 0 System"
 Write-InFile $buffer "$chain"
 $tabSystem = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabSystem -split ' ')                   
 $fi = [array]::indexof($tabFA,"PROCESS") + 1
 $referencedProcessAddress = $tabFA[$fi]
 
-$chain = "dt nt!_eprocess ActiveProcessLinks.Blink ImageFileName $referencedProcessAddress"
+$chain = "$symfix
+dt nt!_eprocess ActiveProcessLinks.Blink ImageFileName $referencedProcessAddress"
 Write-InFile $buffer "$chain"
 $tabSystem = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabSystem -split ' ')                 
 $fi = [array]::indexof($tabFA,"_LIST_ENTRY") + 2
 $referencedProcessLinks = $tabFA[$fi]
 
-$chain = "dt nt!_eprocess ActiveProcessLinks. ImageFileName $referencedProcessAddress"
+$chain = "$symfix
+dt nt!_eprocess ActiveProcessLinks. ImageFileName $referencedProcessAddress"
 Write-InFile $buffer "$chain"
 $tabSystem = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabSystem -split ' ')                  
@@ -117,7 +129,8 @@ $fi = [array]::indexof($tabFA,"]") - 1
 $referencedBLINK = $tabFA[$fi]
 
 # Process next to lsass
-$chain = "dt nt!_eprocess ActiveProcessLinks.Blink ImageFileName $referencedFLINK-$activeProcessLinksOffset)"
+$chain = "$symfix
+dt nt!_eprocess ActiveProcessLinks.Blink ImageFileName $referencedFLINK-$activeProcessLinksOffset)"
 Write-InFile $buffer "$chain"
 $tabSystem = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabSystem -split ' ')                 
@@ -125,7 +138,8 @@ $fi = [array]::indexof($tabFA,"_LIST_ENTRY") + 2
 $forwardProcessLinks = $tabFA[$fi]
 
 # Process to insert
-$chain = "dt nt!_eprocess ActiveProcessLinks.Blink ImageFileName $ProcessAddress"
+$chain = "$symfix
+dt nt!_eprocess ActiveProcessLinks.Blink ImageFileName $ProcessAddress"
 Write-InFile $buffer "$chain"
 $tabSystem = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabSystem -split ' ')                 
@@ -135,22 +149,26 @@ $thisProcessLinks = $tabFA[$fi]
 Write-Output "Begin to insert the process $processName"
 
 # update flink of the process to insert to the base links of the process next to lsass
-$chain = "f $thisProcessLinks L4 0x$($forwardProcessLinks.Substring(17,2)) 0x$($forwardProcessLinks.Substring(15,2)) 0x$($forwardProcessLinks.Substring(13,2)) 0x$($forwardProcessLinks.Substring(11,2))"
+$chain = "$symfix
+f $thisProcessLinks L4 0x$($forwardProcessLinks.Substring(17,2)) 0x$($forwardProcessLinks.Substring(15,2)) 0x$($forwardProcessLinks.Substring(13,2)) 0x$($forwardProcessLinks.Substring(11,2))"
 Write-InFile $buffer "$chain"
 $res = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 
 # update blink of the process to insert to the base links of the process of lsass
-$chain = "f $thisProcessLinks+0x8 L4 0x$($referencedProcessLinks.Substring(17,2)) 0x$($referencedProcessLinks.Substring(15,2)) 0x$($referencedProcessLinks.Substring(13,2)) 0x$($referencedProcessLinks.Substring(11,2))"
+$chain = "$symfix
+f $thisProcessLinks+0x8 L4 0x$($referencedProcessLinks.Substring(17,2)) 0x$($referencedProcessLinks.Substring(15,2)) 0x$($referencedProcessLinks.Substring(13,2)) 0x$($referencedProcessLinks.Substring(11,2))"
 Write-InFile $buffer "$chain"
 $res = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 
 # update flink of referenced process (lsass) to the links process of the process to insert
-$chain = "f $referencedProcessLinks L4 0x$($thisProcessLinks.Substring(17,2)) 0x$($thisProcessLinks.Substring(15,2)) 0x$($thisProcessLinks.Substring(13,2)) 0x$($thisProcessLinks.Substring(11,2))"
+$chain = "$symfix
+f $referencedProcessLinks L4 0x$($thisProcessLinks.Substring(17,2)) 0x$($thisProcessLinks.Substring(15,2)) 0x$($thisProcessLinks.Substring(13,2)) 0x$($thisProcessLinks.Substring(11,2))"
 Write-InFile $buffer "$chain"
 $res = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 
 # update blink of Next process to the links of the process to insert
-$chain = "f $forwardProcessLinks+0x8 L4 0x$($thisProcessLinks.Substring(17,2)) 0x$($thisProcessLinks.Substring(15,2)) 0x$($thisProcessLinks.Substring(13,2)) 0x$($thisProcessLinks.Substring(11,2))"
+$chain = "$symfix
+f $forwardProcessLinks+0x8 L4 0x$($thisProcessLinks.Substring(17,2)) 0x$($thisProcessLinks.Substring(15,2)) 0x$($thisProcessLinks.Substring(13,2)) 0x$($thisProcessLinks.Substring(11,2))"
 Write-InFile $buffer "$chain"
 $res = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 

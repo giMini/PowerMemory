@@ -84,8 +84,13 @@ function Get-OperatingSystemMode ($operatingSystem, $osArchitecture) {
                          $mode = "2016"
                     }
                     else {
-                        Write-Output "The operating system could not be determined... terminating..."
-                        Stop-Script 
+                        if($operatingSystem -eq "10.0.14342") {
+                             $mode = "1014342"
+                        }
+                        else {
+                            Write-Output "The operating system could not be determined... terminating..."
+                            Stop-Script
+                        }
                     }
                 }
             }
@@ -145,6 +150,9 @@ Switch ($mode) {
         }
     "2016" { 
             $memoryWalker = "$scriptPath\debugger\2r2\cdb.exe"
+        }
+    "1014342" {
+            $memoryWalker = "$scriptPath\debugger\pre2r2vm\cdb.exe"
         }
 }
 
