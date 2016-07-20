@@ -412,7 +412,7 @@ function Get-OperatingSystemMode ($operatingSystem, $osArchitecture) {
                     }
                 }
                 else {
-                    if ($operatingSystem -eq "10.0.10514" -or $operatingSystem -eq "10.0.10586" -or $operatingSystem -eq "10.0.11082" -or $operatingSystem -eq "10.0.14342" -or $operatingSystem -eq "10.0.14372"){
+                    if ($operatingSystem -eq "10.0.10514" -or $operatingSystem -eq "10.0.10586" -or $operatingSystem -eq "10.0.11082" -or $operatingSystem -eq "10.0.14342" -or $operatingSystem -eq "10.0.14372" -or $operatingSystem -eq "10.0.14388"){
                          $mode = "2016"
                     }
                     else {
