@@ -228,7 +228,7 @@ function Write-InFile ($buffer, $chain) {
 
 function Call-MemoryWalker ($memoryWalker, $file, $fullScriptPath) {
     if($mode -eq "2016") {
-        $tab = &$memoryWalker -z $file -c "`$`$<$fullScriptPath;Q" -y "$scriptPath\misc\symbols2016TP3"
+        $tab = &$memoryWalker -z $file -c "`$`$<$fullScriptPath;Q" #-y "$scriptPath\misc\symbols2016TP3"
     }
     else {
         $tab = &$memoryWalker -z $file -c "`$`$<$fullScriptPath;Q" 
@@ -412,7 +412,7 @@ function Get-OperatingSystemMode ($operatingSystem, $osArchitecture) {
                     }
                 }
                 else {
-                    if ($operatingSystem -eq "10.0.10514" -or $operatingSystem -eq "10.0.10586" -or $operatingSystem -eq "10.0.11082" -or $operatingSystem -eq "10.0.14342" -or $operatingSystem -eq "10.0.14372" -or $operatingSystem -eq "10.0.14388"){
+                    if ($operatingSystem -eq "10.0.10514" -or $operatingSystem -eq "10.0.10586" -or $operatingSystem -eq "10.0.11082" -or $operatingSystem -eq "10.0.14342" -or $operatingSystem -eq "10.0.14372" -or $operatingSystem -eq "10.0.14388" -or $operatingSystem -eq "10.0.14393"){
                          $mode = "2016"
                     }
                     else {
