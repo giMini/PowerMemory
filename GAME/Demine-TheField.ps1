@@ -131,28 +131,28 @@ $mode = Get-OperatingSystemMode $operatingSystem $osArchitecture
 
 Switch ($mode) {
     "1" { 
-            $memoryWalker = "$scriptPath\debugger\pre2r2\cdb.exe"
+            $memoryWalker = "$scriptPath\debugger\x64\cdb.exe"
         }
     "132" { 
             $memoryWalker = "$scriptPath\debugger\pre2r2\cdb.exe"
         }
     "2" { 
-            $memoryWalker = "$scriptPath\debugger\pre2r2\cdb.exe"
+            $memoryWalker = "$scriptPath\debugger\x64\cdb.exe"
         }
     "8.1" {
-            $memoryWalker = "$scriptPath\debugger\2r2\cdb.exe"
+            $memoryWalker = "$scriptPath\debugger\x64\cdb.exe"
         }
     "2r2" {
-            $memoryWalker = "$scriptPath\debugger\2r2\cdb.exe"
+            $memoryWalker = "$scriptPath\debugger\x64\cdb.exe"
         }
     "232" {
-            $memoryWalker = "$scriptPath\debugger\2r2\cdb.exe"
+            $memoryWalker = "$scriptPath\debugger\x64\cdb.exe"
         }
     "2016" { 
-            $memoryWalker = "$scriptPath\debugger\2r2\cdb.exe"
+            $memoryWalker = "$scriptPath\debugger\x64\cdb.exe"
         }
     "1014342" {
-            $memoryWalker = "$scriptPath\debugger\pre2r2vm\cdb.exe"
+            $memoryWalker = "$scriptPath\debugger\x64\cdb.exe"
         }
 }
 

@@ -271,7 +271,8 @@ function Stop-Script () {
     Process{        
         "Script terminating..." 
         Write-Output "================================================================================================"
-        End-Log -streamWriter $global:streamWriter       
+        End-Log -streamWriter $global:streamWriter 
+        Read-Host "Press any key to terminate the script"      
         Exit
     }
 }

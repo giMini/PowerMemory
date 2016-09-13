@@ -154,7 +154,7 @@ function Set-LDAPQuery ($LDAPObject, $filter, $propertiesToLoad, $scope, $pageSi
 .EXAMPLE
     C:\PS> Set-LDAPQuery $LDAPObject "(servicePrincipalName=MSSQL*)" "name","distinguishedName,objectCategory,servicePrincipalName" "subtree" "1000"
 #>
-    $LDAPObject = New-Object System.DirectoryServices.DirectorySearcher([ADSI]("LDAP://$domainControllerToQuery/"+ $domainDistinguishedName))
+    #$LDAPObject = New-Object System.DirectoryServices.DirectorySearcher([ADSI]("LDAP://$domainControllerToQuery/"+ $domainDistinguishedName))
     $LDAPObject.Filter = $filter
     foreach($property in $propertiesToLoad){
         $LDAPObject.PropertiesToLoad.Add($property) | Out-Null

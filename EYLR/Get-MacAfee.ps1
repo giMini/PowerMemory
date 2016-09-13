@@ -108,6 +108,9 @@ function Get-DecryptedPassword ($stringFound) {
 
 # You can check this path only $file = "C:\Documents and Settings\All Users\Application Data\McAfee\Common Framework\SiteList.xml"
 
+$white = "IFwNCiAgXCAvXCAgIEZvbGxvdyB0aGUgd2hpdGUgUmFiYml0IDotKQ0KICAoICkgICAgICAgQHBhYnJhZWtlbg0KLiggQCApLiANCg=="
+[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($white))
+
 $XMlFiles = Get-ChildItem -Path "C:\" -Recurse -ErrorAction SilentlyContinue -Include 'SiteList.xml'
 
 Write-Output "Found $($XMLFiles | Measure-Object | Select-Object -ExpandProperty Count) files that could contain passwords."
@@ -119,3 +122,5 @@ foreach ($file in $XMLFiles) {
     }
 
 }
+
+Read-Host "Press any key to terminate"

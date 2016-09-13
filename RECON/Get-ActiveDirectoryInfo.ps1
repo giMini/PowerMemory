@@ -278,13 +278,13 @@ foreach($domain in $domains) {
         Write-Progress -Activity "LDAP (&(objectCategory=user)(admincount=1)) query will be executed on LDAP://$domainControllerToQuery/$domainDistinguishedName" -status "Running..." -id 1  
         $LDAPObject = New-Object System.DirectoryServices.DirectorySearcher([ADSI]("LDAP://$domainControllerToQuery/"+ $domainDistinguishedName ))
         $filter = "(&(objectCategory=user)(admincount=1))" 
-        $propertiesToLoad = "distinguishedName","objectSID"
+        $propertiesToLoad = "distinguishedName","objectsid"
         $scope = "subtree" 
         $pageSize = 1000 
         $LDAPQuery  = Set-LDAPQuery $LDAPObject $filter $propertiesToLoad $scope $pageSize
         $adminCounts = $LDAPQuery.FindAll() 
 		
-        if($? -and $adminCounts -ne $Null)
+        if($adminCounts)
         {
 	        $adminCounts = $adminCounts | Sort Name
 	        If($adminCounts -is [array])
@@ -317,7 +317,7 @@ foreach($domain in $domains) {
                 $user = $LDAPQuery.findOne()
 		        $xRow++
 				
-		        if($? -and $user -ne $Null) {
+		        if($user) {
 			        $userName =  $user.Properties.name            
 			        if($user.Properties.pwdlastset -eq $Null) {
 				        $userPwdLastSet = "No Date Set" #-ForegroundColor Red
@@ -332,7 +332,7 @@ foreach($domain in $domains) {
                         $errorColor = 1
 			        }
                     else {
-			            #$expiration =  $user.Properties.useraccountcontrol
+			            $expiration =  $user.Properties.useraccountcontrol
                     }
 
 			        if($user.Properties.useraccountcontrol -eq 514) {
@@ -380,13 +380,13 @@ foreach($domain in $domains) {
         Write-Progress -Activity "LDAP (&(objectCategory=group)(admincount=1)) query will be executed on LDAP://$domainControllerToQuery/$domainDistinguishedName" -status "Running..." -id 1  
         $LDAPObject = New-Object System.DirectoryServices.DirectorySearcher([ADSI]("LDAP://$domainControllerToQuery/"+ $domainDistinguishedName ))
         $filter = "(&(objectCategory=group)(admincount=1))" 
-        $propertiesToLoad = "distinguishedName","objectSID"
+        $propertiesToLoad = "distinguishedName","objectsid"
         $scope = "subtree" 
         $pageSize = 1000 
         $LDAPQuery  = Set-LDAPQuery $LDAPObject $filter $propertiesToLoad $scope $pageSize
         $adminCounts = $LDAPQuery.FindAll() 
 
-        if($? -and $adminCounts -ne $Null) {
+        if($adminCounts) {
 	        $adminCounts = $adminCounts | Sort Name
 	        if($adminCounts -is [array]) {
 		        [int]$AdminsCount = $adminCounts.Count
@@ -400,7 +400,7 @@ foreach($domain in $domains) {
     
             $errorColor = 0
 	        foreach($admin in $adminCounts) {
-                $distinguishedName = $Admin.Properties.distinguishedname
+                $distinguishedName = $admin.Properties.distinguishedname
         
 		        #$user = Get-ADGroup -Identity "$distinguishedName" -Properties Name, PasswordLastSet, Enabled, PasswordNeverExpires | Select-Object Name, PasswordLastSet, Enabled, PasswordNeverExpires
                 $LDAPObject = New-Object System.DirectoryServices.DirectorySearcher([ADSI]("LDAP://$domainControllerToQuery/"+ $domainDistinguishedName ))
@@ -412,14 +412,14 @@ foreach($domain in $domains) {
                 $user = $LDAPQuery.findOne()
 		        $xRow++
 				
-		        if($? -and $user -ne $Null) {
+		        if($user) {
 			        $userName = $user.Properties.name			
 			        if($user.Properties.useraccountcontrol -eq 65536) {
 				        $expiration =  "Never expire"
                         $errorColor = 1
 			        }
                     else {
-			             #$expiration =  $user.Properties.useraccountcontrol
+			             $expiration =  $user.Properties.useraccountcontrol
                     }
 			        if($user.Properties.useraccountcontrol -eq 514) {
 				        $userEnable = "Disabled"
@@ -454,7 +454,8 @@ foreach($domain in $domains) {
     }
 
 
-    Write-Log -streamWriter $global:streamWriter -infoToLog "$(Get-Date): `n`n`t`tListing Stale computers`n"
+    Write-Log -streamWriter $global:streamWriter -infoToLog "`n`n`t`tListing Stale computers`n"
+    Write-Log -streamWriter $global:streamWriter -infoToLog "`t---------------------------------`n"
 
     Write-Progress -Activity "LDAP (&(objectCategory=computer)(admincount=1)) query will be executed on LDAP://$domainControllerToQuery/$domainDistinguishedName" -status "Running..." -id 1  
     $LDAPObject = New-Object System.DirectoryServices.DirectorySearcher([ADSI]("LDAP://$domainControllerToQuery/"+ $domainDistinguishedName ))
@@ -485,17 +486,19 @@ foreach($domain in $domains) {
     Try{
         $LDAPObject = New-Object System.DirectoryServices.DirectorySearcher([ADSI]("LDAP://$domainControllerToQuery/"+ $domainDistinguishedName ))    
         $filter = "(&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=32))"         
-        $propertiesToLoad = "Name","pwdLastSet","userAccountControl, objectSID"
+        $propertiesToLoad = "Name","pwdLastSet","userAccountControl","objectsid"
         $scope = "subtree" 
         $pageSize = 1000 
         $LDAPQuery  = Set-LDAPQuery $LDAPObject $filter $propertiesToLoad $scope $pageSize    
         $users = $LDAPQuery.FindAll() 
-        Write-Log -streamWriter $global:streamWriter -infoToLog "$(Get-Date): `n`n`t`tListing potential empty accounts password`n"  
+        Write-Log -streamWriter $global:streamWriter -infoToLog "`n`n`t`tListing potential empty accounts password`n"  
+        Write-Log -streamWriter $global:streamWriter -infoToLog "`t---------------------------------`n"
         foreach($user in $users) {
-            $byte = $user.Properties.objectSID
-            Write-Log -streamWriter $global:streamWriter -infoToLog "$($user.Properties.name) (" + (New-Object System.Security.Principal.SecurityIdentifier($byte[0],0)).Value + ")"
-            Write-Log -streamWriter $global:streamWriter -infoToLog "----------------------------------------------------------------------------------------------"
+            $byte = $user.Properties.objectsid
+            $emptyAccount = "$($user.Properties.name) (" + $((New-Object System.Security.Principal.SecurityIdentifier($byte[0],0)).Value) + ")"            
+            Write-Log -streamWriter $global:streamWriter -infoToLog "$emptyAccount)"           
         }
+        Write-Log -streamWriter $global:streamWriter -infoToLog "----------------------------------------------------------------------------------------------"
     }
     Catch{
         Write-Host $_.Exception

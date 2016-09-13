@@ -80,7 +80,7 @@ $forestDomain = Get-ForestDomain $currentDomain
 $domains = $forestDomain.forest.Domains
 
 $remoteLocalFile = $SPNScript 
-<#
+
 $remoteLocalFile = Read-Host 'Which SPN type do you want to locate?
 1) CIFS
 2) DNS
@@ -101,7 +101,7 @@ $remoteLocalFile = Read-Host 'Which SPN type do you want to locate?
 0) Exit
 
 Enter menu number and press <ENTER>' 
-#>
+
 switch ($remoteLocalFile){
     "1" {$type = "CIFS"}
     "2" {$type = "DNS"}
@@ -127,4 +127,4 @@ foreach($domain in $domains) {
     Scan-ServicePrincipalName -Type $type -Domain $domain
 }
 
-#Read-Host
+Read-Host "Press any key to terminate"

@@ -146,7 +146,6 @@ $chain = "$symfix
 !process 0 0 $Process"
 Write-InFile $buffer "$chain"
 $tabSystem = Call-MemoryWalker $kd $file $fullScriptPath $symbols
-$tabSystem
 $tabFA = ($tabSystem -split ' ')                   
 $fi = [array]::indexof($tabFA,"PROCESS") + 1
 $processAddress = $tabFA[$fi]
