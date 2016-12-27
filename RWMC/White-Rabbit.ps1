@@ -5,7 +5,7 @@
     Reveal credentials from Windows Memory
 
 .NOTES
-    Version:        1.2
+    Version:        1.3
     Author:         Pierre-Alexandre Braeken
     Creation Date:  2015-05-01
 
@@ -52,6 +52,7 @@ $server = ""
 $elevate = 0
 $dev_key = $null
 $snapshot = $false
+$snapshotVMWare = $false
 $kernel = $false
 $toADD = 0
 $mode = ""
@@ -134,8 +135,9 @@ $remoteLocalFile = Read-Host 'Local computer, Remote computer or from a dump fil
 1) Local
 2) Remote
 3) lsass process .dmp
-4) VM snapshot .dmp
-5) kernel mode (mode debug must be activated)
+4) Hyper-V VM snapshot .dmp
+5) VMWare VM snapshot .dmp
+6) kernel mode (mode debug must be activated)
 0) Exit
 
 Enter menu number and press <ENTER>'
@@ -144,7 +146,8 @@ switch ($remoteLocalFile){
     "2" {$dump = "remote"}
     "3" {$dump = "dump"}
     "4" {$dump = "snapshot"}
-    "5" {$dump = "kernel"}
+    "5" {$dump = "snapshotVMWare"}
+    "6" {$dump = "kernel"}
     "0" {Stop-Script}
     "m" {cls;White-MakeMeASandwich;Stop-Script}
     default {Write-Output "The option could not be determined... generate local dump"}
@@ -152,7 +155,7 @@ switch ($remoteLocalFile){
 
 Set-ActiveDirectoryInformations $adFlag
 
-if($dump -eq "dump" -or $dump -eq "snapshot" -or $dump -eq "kernel") {
+if($dump -eq "dump" -or $dump -eq "snapshot" -or $dump -eq "snapshotVMWare" -or $dump -eq "kernel") {
     if($dump -eq "dump") {
         $dump = Read-Host 'Enter the path of your lsass process dump'
     }
@@ -162,8 +165,14 @@ if($dump -eq "dump" -or $dump -eq "snapshot" -or $dump -eq "kernel") {
             $dump = Read-Host 'Enter the path of your VM snapshot dump'
         }
         else {
-            if($dump -eq "kernel") {
-                $kernel = $true
+            if($dump -eq "snapshotVMWare") {
+                $snapshotVMWare = $true
+                $dump = Read-Host 'Enter the path of your VM snapshot dump'
+            }
+            else {
+                if($dump -eq "kernel") {
+                    $kernel = $true
+                }
             }
         }
     }
@@ -252,15 +261,15 @@ if($hostMode -ne "") {
 
 if($mode -eq "2r2" -or $mode -eq "232" -or $mode -eq "2016" -or $mode -eq "8.1") {
     if($mode -eq "2r2") {
-        if($snapshot -eq $true) {
-            $memoryWalker = "$scriptPath\debugger\2r2vm\cdb.exe"
+        if($snapshot -eq $true -or $snapshotVMWare -eq $true) {
+            $memoryWalker = "$scriptPath\debugger\pre2r2vm\cdb.exe"
         }
         else {
             $memoryWalker = "$scriptPath\debugger\2r2\cdb.exe"
         }
     }
     else {
-        if($snapshot -eq $true) {
+        if($snapshot -eq $true -or $snapshotVMWare -eq $true) {
             $memoryWalker = "$scriptPath\debugger\pre2r2vm\cdb.exe"
         }
         else {
@@ -328,7 +337,7 @@ else {
     }
 }
 if($kernel -eq $false) {
-    if($snapshot -eq $false) {
+    if($snapshot -eq $false -and $snapshotVMWare -eq $false) {
         if($mode -eq 1 -or $mode -eq 132 -or $mode -eq 2 -or $mode -eq "2r2" -or $mode -eq "8.1" -or $mode -eq "232" -or $mode -eq "2016") {
             Get-SupportedSystemsInformations $buffer $fullScriptPath             
         }
@@ -337,7 +346,19 @@ if($kernel -eq $false) {
         }
     }
     else {
-        Get-VMSnapshotInformations $buffer $fullScriptPath         
+        if($snapshot -eq $true) {
+            Get-VMSnapshotInformations -Buffer $buffer -FullScriptPath $fullScriptPath -Hypervisor 0  # Hyper-V         
+        }
+        else {
+            if($snapshotVMWare -eq $true) {
+                Get-VMSnapshotInformations -Buffer $buffer -FullScriptPath $fullScriptPath -Hypervisor 1     
+           
+            }
+        }      
+    <#
+    else {    
+        Get-ObsoleteSystemsInformations $buffer $fullScriptPath 
+    } #>
     }
 }
 else {

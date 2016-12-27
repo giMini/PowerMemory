@@ -1,5 +1,23 @@
-﻿function Get-VMSnapshotInformations ($buffer, $fullScriptPath) {       
-    $toAdd = 12
+﻿function Get-VMSnapshotInformations { 
+
+Param
+    (
+        [Parameter(Position=0,mandatory=$true)]    
+        [String] $Buffer,
+        [Parameter(Position=0,mandatory=$true)]    
+        [String] $FullScriptPath,
+        [Parameter(Position=0,mandatory=$false)]    
+        [int16] $Hypervisor
+        
+    )  
+    
+    if ($Hypervisor -eq 1) {
+        $toAdd = 11
+    }
+    else {    
+        $toAdd = 12
+    }
+             
     $chainProcess = ""    
     $chain = White-RabbitContext    
     Write-InFile $buffer $chain    
@@ -23,7 +41,7 @@
         Write-InFile $buffer "$chainProcess;$chain"     
         $chain2 = White-Rabbit2  
         $tab = Call-MemoryWalker $memoryWalker $file $fullScriptPath        
-        $sa = Clean-String $tab $mode $snapshot
+        $sa = Clean-String $tab $mode "VMWare"
         $command = "$chain2 $sa"    
         Write-InFile $buffer "$chainProcess;$command" 
         $tab = &$memoryWalker -z $file -c "`$`$<$fullScriptPath;Q"                      

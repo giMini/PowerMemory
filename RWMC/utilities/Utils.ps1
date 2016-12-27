@@ -239,7 +239,8 @@ function Call-MemoryWalker ($memoryWalker, $file, $fullScriptPath) {
 function Clean-String ($tab, $matches, $snapshot) {    
     if($snapshot -eq $true) {$toAdd = 8;$chain="Implicit"}
     else {if($snapshot -eq "kernel") {$toAdd = 7;$chain="Implicit"}
-        else {$toAdd = 0;$chain = White-Rabbit42}}
+        else {if($snapshot -eq "VMWare") {$toAdd = 7;$chain="Implicit"}
+            else {$toAdd = 0;$chain = White-Rabbit42}}}
     $tabA = ($tab -split ' ')     
     if($mode -eq 132) { 
         $start = 20
