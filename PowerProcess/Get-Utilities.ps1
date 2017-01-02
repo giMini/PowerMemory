@@ -34,7 +34,7 @@
                          $mode = "2016"
                     }
                     else {
-                        if($operatingSystem -eq "10.0.14342" -or $operatingSystem -eq "10.0.14372" -or $operatingSystem -eq "10.0.14388") {
+                        if($operatingSystem -eq "10.0.14342" -or $operatingSystem -eq "10.0.14372" -or $operatingSystem -eq "10.0.14388" -or $operatingSystem -eq "10.0.14393") {
                              $mode = "1014342"
                         }
                         else {

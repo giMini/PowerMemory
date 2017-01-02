@@ -5,7 +5,7 @@
     Reveal credentials from Windows Memory
 
 .NOTES
-    Version:        1.3
+    Version:        1.4
     Author:         Pierre-Alexandre Braeken
     Creation Date:  2015-05-01
 
@@ -138,6 +138,7 @@ $remoteLocalFile = Read-Host 'Local computer, Remote computer or from a dump fil
 4) Hyper-V VM snapshot .dmp
 5) VMWare VM snapshot .dmp
 6) kernel mode (mode debug must be activated)
+7) Local passwords hashes
 0) Exit
 
 Enter menu number and press <ENTER>'
@@ -148,6 +149,7 @@ switch ($remoteLocalFile){
     "4" {$dump = "snapshot"}
     "5" {$dump = "snapshotVMWare"}
     "6" {$dump = "kernel"}
+    "7" {$dump = "hashes"}
     "0" {Stop-Script}
     "m" {cls;White-MakeMeASandwich;Stop-Script}
     default {Write-Output "The option could not be determined... generate local dump"}
