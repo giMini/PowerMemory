@@ -4,8 +4,7 @@
 .SYNOPSIS         
     Reveal credentials from Windows Memory
 
-.NOTES
-    Version:        1.4
+.NOTES    
     Author:         Pierre-Alexandre Braeken
     Creation Date:  2015-05-01
 

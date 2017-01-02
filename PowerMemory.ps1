@@ -5,7 +5,7 @@
     PowerMemory launcher
 
 .NOTES
-    Version:        1.4
+    Version:        1.4.1
     Author:         Pierre-Alexandre Braeken    
 
 #>
@@ -118,7 +118,6 @@ if($assessmentType -eq 7) {
 
 if($assessmentType -eq 8) {
     $scriptPath = Split-Path $MyInvocation.InvocationName   
-    $RWMC = $scriptPath + "\RWMC\local\Dump-Hashes.ps1"     
-    $ArgumentList = 'Start-Process -FilePath powershell.exe -ArgumentList \"-ExecutionPolicy Bypass -File "{0}"\" ' -f $RWMC;
-    Start-Process -FilePath powershell.exe -ArgumentList $ArgumentList -Wait -NoNewWindow;    
+    $RWMC = $scriptPath + "\RWMC\local\Dump-Hashes.ps1" 
+    . $RWMC    
 }
