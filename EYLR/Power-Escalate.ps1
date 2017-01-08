@@ -1,5 +1,16 @@
 ﻿#requires -version 2
 
+<#
+
+.SYNOPSIS         
+    Power-Escalate launcher
+
+.NOTES
+    Version:        1.1
+    Author:         Pierre-Alexandre Braeken    
+
+#>
+
 Set-StrictMode -version 2
 
 function Write-Log {
@@ -177,6 +188,10 @@ foreach ($credential in $credentials) {
     $i++
 }
 Write-Log -StreamWriter $streamWriter -InfoToLog "`r`n$i password(s) found"
+
+$passwords = (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)}  | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim(); $_} | %{[PSCustomObject]@{ PROFILE_NAME=$name;PASSWORD=$pass }} | Format-Table -AutoSize 
+
+Write-Log -StreamWriter $streamWriter -InfoToLog "`r`nWIFI passwords:`r`n $passwords "
 
 $environmentPathVars = ($env:Path)
 Get-UsualSuspect -StreamWriter $streamWriter -Result $environmentPathVars -Title "Any non-default directory is a possible win because authenticated users will have write access to these directories"
