@@ -104,7 +104,7 @@ function Write-InFile ($buffer, $chain) {
 }
 
 function Call-MemoryWalker ($memoryWalker, $file, $fullScriptPath, $symbols) {
-    $tab = &$memoryWalker -pn winmine.exe -y $symbols -c "`$`$<$fullScriptPath;qd"     
+    $tab = &$memoryWalker -pn winmine.exe -c "`$`$<$fullScriptPath;qd" -y "$scriptPath\" #-y $symbols
     return $tab
 }
 
